@@ -1,0 +1,1705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COVID-19 Research Hub — Personal Data Collection</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:ital,wght@0,300;0,400;0,600;1,300&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #0e1117;
+    --surface: #161b27;
+    --surface2: #1d2433;
+    --border: #2a3347;
+    --accent: #4a9eff;
+    --accent2: #f59e0b;
+    --accent3: #10b981;
+    --accent4: #f43f5e;
+    --text: #e2e8f0;
+    --text-muted: #8892a4;
+    --text-dim: #4a5568;
+    --serif: 'IBM Plex Serif', Georgia, serif;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'Inter', system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  /* ── TOP NAV ── */
+  #top-nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: rgba(14,17,23,0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    height: 52px;
+    gap: 4px;
+  }
+  .nav-brand {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    margin-right: 20px;
+  }
+  .nav-links {
+    display: flex;
+    gap: 2px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    flex: 1;
+  }
+  .nav-links::-webkit-scrollbar { display: none; }
+  .nav-link {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+    text-decoration: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    white-space: nowrap;
+    transition: all 0.15s;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+  .nav-link:hover { color: var(--text); background: var(--surface2); }
+  .nav-link.active { color: var(--accent); background: rgba(74,158,255,0.1); }
+
+  /* ── LAYOUT ── */
+  .page-wrap {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 80px 24px 80px;
+  }
+
+  /* ── HERO ── */
+  #hero {
+    padding: 60px 0 48px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 56px;
+  }
+  .hero-eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .hero-title {
+    font-family: var(--serif);
+    font-size: clamp(28px, 4vw, 46px);
+    font-weight: 600;
+    line-height: 1.15;
+    color: #fff;
+    margin-bottom: 16px;
+  }
+  .hero-title span { color: var(--accent); }
+  .hero-desc {
+    max-width: 640px;
+    color: var(--text-muted);
+    font-size: 15px;
+    line-height: 1.8;
+    margin-bottom: 28px;
+  }
+  .hero-stats {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+  .hero-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .hero-stat-num {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--accent2);
+  }
+  .hero-stat-label {
+    font-size: 11px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── SECTION ── */
+  .section {
+    margin-bottom: 72px;
+    scroll-margin-top: 64px;
+  }
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 28px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+  }
+  .section-title {
+    font-family: var(--serif);
+    font-size: 24px;
+    font-weight: 600;
+    color: #fff;
+  }
+  .section-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  /* ── CARDS ── */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    transition: border-color 0.2s;
+  }
+  .card:hover { border-color: var(--accent); }
+  .card-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+    color: var(--text-dim);
+  }
+  .card-title {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text);
+    margin-bottom: 8px;
+    line-height: 1.4;
+  }
+  .card-body {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.7;
+    margin-bottom: 12px;
+  }
+  .card-source {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.15s;
+  }
+  .card-source:hover { border-color: var(--accent); }
+
+  /* ── VERDICT BADGE ── */
+  .badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 7px;
+    border-radius: 3px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+  .badge-confirmed { background: rgba(16,185,129,0.15); color: #10b981; }
+  .badge-disputed { background: rgba(245,158,11,0.15); color: #f59e0b; }
+  .badge-contested { background: rgba(244,63,94,0.15); color: #f43f5e; }
+  .badge-evolving  { background: rgba(74,158,255,0.15); color: #4a9eff; }
+
+  /* ── TIMELINE ── */
+  .timeline {
+    position: relative;
+    padding-left: 28px;
+    margin-bottom: 20px;
+  }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 7px; top: 0; bottom: 0;
+    width: 1px;
+    background: var(--border);
+  }
+  .tl-item {
+    position: relative;
+    margin-bottom: 22px;
+  }
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: -24px; top: 7px;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--bg);
+  }
+  .tl-item.changed::before { background: var(--accent2); }
+  .tl-item.contested::before { background: var(--accent4); }
+  .tl-date {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+    margin-bottom: 3px;
+  }
+  .tl-text {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    line-height: 1.65;
+  }
+  .tl-text strong { color: var(--text); }
+  .tl-link {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--accent);
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 4px;
+  }
+  .tl-link:hover { text-decoration: underline; }
+
+  /* ── COMPARISON TABLE ── */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    margin-bottom: 16px;
+  }
+  .compare-table th {
+    text-align: left;
+    padding: 10px 14px;
+    background: var(--surface2);
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .compare-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+  .compare-table tr:hover td { background: var(--surface); }
+  .compare-table .pro { color: #10b981; }
+  .compare-table .con { color: #f43f5e; }
+  .compare-table td a {
+    color: var(--accent);
+    font-family: var(--mono);
+    font-size: 10px;
+    text-decoration: none;
+  }
+  .compare-table td a:hover { text-decoration: underline; }
+
+  /* ── CALLOUT ── */
+  .callout {
+    background: var(--surface);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 6px 6px 0;
+    padding: 14px 18px;
+    margin: 16px 0;
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+  .callout.warn { border-color: var(--accent2); }
+  .callout.danger { border-color: var(--accent4); }
+  .callout strong { color: var(--text); }
+
+  /* ── DATA BAR ── */
+  .data-bars { margin-bottom: 16px; }
+  .data-bar-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+  .data-bar-label {
+    font-size: 12px;
+    color: var(--text-muted);
+    width: 180px;
+    flex-shrink: 0;
+  }
+  .data-bar-track {
+    flex: 1;
+    height: 8px;
+    background: var(--surface2);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .data-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    background: var(--accent3);
+    transition: width 1s ease;
+  }
+  .data-bar-fill.amber { background: var(--accent2); }
+  .data-bar-fill.blue { background: var(--accent); }
+  .data-bar-fill.red { background: var(--accent4); }
+  .data-bar-val {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text);
+    width: 48px;
+    text-align: right;
+  }
+
+  /* ── ACCORDION ── */
+  .accordion { border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin-bottom: 12px; }
+  .accordion-btn {
+    width: 100%;
+    background: var(--surface);
+    border: none;
+    padding: 14px 18px;
+    text-align: left;
+    cursor: pointer;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 500;
+    font-family: var(--sans);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.15s;
+  }
+  .accordion-btn:hover { background: var(--surface2); }
+  .accordion-btn .chevron {
+    transition: transform 0.25s;
+    color: var(--text-dim);
+    font-size: 16px;
+  }
+  .accordion-btn.open .chevron { transform: rotate(180deg); }
+  .accordion-body {
+    display: none;
+    padding: 16px 18px;
+    background: var(--bg);
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.75;
+    border-top: 1px solid var(--border);
+  }
+  .accordion-body.open { display: block; }
+  .accordion-body a { color: var(--accent); }
+
+  /* ── ESSAY SECTION ── */
+  #essay-section {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 32px 36px;
+  }
+  #essay-output {
+    font-family: var(--serif);
+    font-size: 16px;
+    line-height: 1.9;
+    color: var(--text-muted);
+    white-space: pre-wrap;
+    min-height: 200px;
+  }
+  #essay-output p + p { margin-top: 1em; }
+  #essay-controls {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+  .btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: var(--sans);
+    transition: opacity 0.15s;
+  }
+  .btn:hover { opacity: 0.88; }
+  .btn.secondary {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .btn:disabled { opacity: 0.45; cursor: default; }
+  #essay-prompt {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 13px;
+    padding: 10px 14px;
+    margin-bottom: 12px;
+    resize: vertical;
+    min-height: 70px;
+    outline: none;
+  }
+  #essay-prompt:focus { border-color: var(--accent); }
+  .spinner {
+    display: none;
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.2);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    margin-left: 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── SEARCH ── */
+  #search-bar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 32px;
+    max-width: 480px;
+  }
+  #search-input {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 13px;
+    padding: 9px 14px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  #search-input:focus { border-color: var(--accent); }
+
+  /* ── FOOTNOTE ── */
+  .footnote {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 640px) {
+    .nav-brand { display: none; }
+    .page-wrap { padding: 70px 16px 60px; }
+    .compare-table { font-size: 12px; }
+    #essay-section { padding: 20px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav id="top-nav">
+  <div class="nav-brand">COVID-19 Research Hub</div>
+  <div class="nav-links">
+    <a class="nav-link active" href="#origins">Origins</a>
+    <a class="nav-link" href="#gain-of-function">Gain-of-Function</a>
+    <a class="nav-link" href="#fauci">Fauci / NIH</a>
+    <a class="nav-link" href="#vaccines">Vaccines</a>
+    <a class="nav-link" href="#vaccine-harm">Vaccine Harms</a>
+    <a class="nav-link" href="#masks">Masks</a>
+    <a class="nav-link" href="#death-counts">Death Counts</a>
+    <a class="nav-link" href="#how-deadly">How Deadly?</a>
+    <a class="nav-link" href="#hospitals">Hospitals</a>
+    <a class="nav-link" href="#changed-facts">Changed Facts</a>
+    <a class="nav-link" href="#conflicts">Conflicting Data</a>
+    <a class="nav-link" href="#essay">Write Essay</a>
+  </div>
+</nav>
+
+<div class="page-wrap">
+
+  <!-- HERO -->
+  <div id="hero">
+    <p class="hero-eyebrow">Personal Research Archive · Last updated June 2026</p>
+    <h1 class="hero-title">COVID-19 <span>Evidence</span> Tracker</h1>
+    <p class="hero-desc">A self-curated collection of peer-reviewed studies, government testimony, investigative reporting, and intelligence assessments on COVID-19 origins, vaccines, mask efficacy, and the gain-of-function debate. All claims are sourced; conflicting accounts are shown side by side. Click any source link to read the primary document.</p>
+
+      <div class="hero-stat"><span class="hero-stat-num">80+</span><span class="hero-stat-label">Sources collected</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">11</span><span class="hero-stat-label">Topic categories</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">2019–2026</span><span class="hero-stat-label">Date range</span></div>
+      <div class="hero-stat"><span class="hero-stat-num">∞</span><span class="hero-stat-label">Questions remaining</span></div>
+    </div>
+    <div style="margin-top:20px;">
+      <a href="covid19-charts-timeline.html" style="display:inline-flex;align-items:center;gap:8px;background:#4a9eff;color:#fff;text-decoration:none;padding:10px 20px;border-radius:6px;font-size:13px;font-weight:500;">
+        📊 View Charts &amp; Visual Timeline →
+      </a>
+    </div>
+  </div>
+
+  <!-- SEARCH -->
+  <div id="search-bar">
+    <input id="search-input" type="text" placeholder="Search this page…" oninput="searchPage(this.value)">
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       SECTION 1: ORIGINS
+  ══════════════════════════════════════════ -->
+  <section class="section" id="origins">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <h2 class="section-title">Virus Origins</h2>
+      <span class="section-sub">Where did SARS-CoV-2 come from?</span>
+    </div>
+
+    <div class="callout">
+      <strong>State of knowledge (June 2026):</strong> No scientific or intelligence consensus has been reached. The two principal hypotheses — natural zoonotic spillover and lab-related incident — remain actively contested. The debate is compounded by China's refusal to share raw data and the absence of a definitive intermediate animal host.
+    </div>
+
+    <h3 style="font-size:14px;font-weight:600;color:var(--text);margin:20px 0 12px;">Hypothesis 1: Zoonotic (Natural) Origin</h3>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-label">Proximal Origin · 2020</div>
+        <div class="card-title">Natural selection in animals before zoonotic transfer <span class="badge badge-disputed">Disputed</span></div>
+        <div class="card-body">Andersen et al. argued in <em>Nature Medicine</em> (2020) that the receptor-binding domain of SARS-CoV-2 and its polybasic furin cleavage site are most consistent with natural selection, not deliberate manipulation. One of the most cited papers early in the pandemic. Later revealed to have been influenced by Fauci's team (see Fauci section).</div>
+        <a class="card-source" href="https://www.nature.com/articles/s41591-020-0820-9" target="_blank">→ Andersen et al., Nature Medicine, 2020</a>
+      </div>
+      <div class="card">
+        <div class="card-label">Science Journal · 2022</div>
+        <div class="card-title">Huanan Seafood Market as early epicenter <span class="badge badge-contested">Contested</span></div>
+        <div class="card-body">Worobey et al. published two linked papers in <em>Science</em> (2022) arguing the earliest COVID-19 cases were geographically and epidemiologically linked to the Huanan wet market — supporting a natural spillover in or near that location. Peer-reviewed but critiqued for methodological assumptions.</div>
+        <a class="card-source" href="https://www.science.org/doi/10.1126/science.abp8337" target="_blank">→ Worobey et al., Science, 2022</a>
+      </div>
+      <div class="card">
+        <div class="card-label">WHO Report · 2021</div>
+        <div class="card-title">WHO-China joint study: lab leak "extremely unlikely" <span class="badge badge-disputed">Later Revised</span></div>
+        <div class="card-body">The initial WHO-convened international study (Feb 2021) rated a lab leak "extremely unlikely" while citing zoonotic origin as "likely to very likely." WHO Director Tedros later acknowledged the study was insufficient and called for a more robust Phase 2 investigation — which China refused.</div>
+        <a class="card-source" href="https://www.who.int/publications/i/item/who-convened-global-study-of-origins-of-sars-cov-2-china-part" target="_blank">→ WHO-convened global study, March 2021</a>
+      </div>
+    </div>
+
+    <h3 style="font-size:14px;font-weight:600;color:var(--text);margin:20px 0 12px;">Hypothesis 2: Laboratory-Related Incident</h3>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-label">US Intelligence · 2023–2025</div>
+        <div class="card-title">FBI & Dept. of Energy conclude lab leak "most likely" <span class="badge badge-evolving">Ongoing</span></div>
+        <div class="card-body">The FBI (2023, "moderate confidence") and the Dept. of Energy (2023, "low confidence") concluded a lab incident is the most likely origin. In Jan 2025, the CIA joined them — but with "low confidence." The National Intelligence Council and four other agencies still lean toward natural origin. No agency has "high confidence" in either direction.</div>
+        <a class="card-source" href="https://www.dni.gov/index.php/newsroom/reports-publications/reports-publications-2023/3755-2023-annual-threat-assessment-of-the-u-s-intelligence-community" target="_blank">→ ODNI 2023 Annual Threat Assessment</a>
+      </div>
+      <div class="card">
+        <div class="card-label">House Select Subcommittee · May 2024</div>
+        <div class="card-title">Congressional investigation concludes lab leak origin <span class="badge badge-contested">Partisan</span></div>
+        <div class="card-body">After a 2-year investigation reviewing 1+ million pages of documents, the Republican-led House Select Subcommittee on the Coronavirus Pandemic concluded SARS-CoV-2 "did not originate naturally" and likely leaked from a Wuhan lab. The report criticized multiple US science agencies. Democratic members disputed many conclusions.</div>
+        <a class="card-source" href="https://www.science.org/content/article/house-panel-concludes-covid-19-pandemic-came-lab-leak" target="_blank">→ Science Magazine reporting, May 2024</a>
+      </div>
+      <div class="card">
+        <div class="card-label">Former CDC Director · 2023</div>
+        <div class="card-title">Dr. Robert Redfield: biology of virus points to lab origin</div>
+        <div class="card-body">Former CDC Director Dr. Robert Redfield testified that the biology of SARS-CoV-2 itself — including its immediate high human transmissibility and the furin cleavage site not found in related bat coronaviruses — supports a lab-related origin hypothesis. He cited "unusual actions" in Wuhan in fall 2019 as additional evidence.</div>
+        <a class="card-source" href="https://oversight.house.gov/release/covid-origins-hearing-wrap-up-facts-science-evidence-point-to-a-wuhan-lab-leak%EF%BF%BC/" target="_blank">→ House Oversight Committee, COVID Origins Hearing, 2023</a>
+      </div>
+      <div class="card">
+        <div class="card-label">White House Report · June 2025</div>
+        <div class="card-title">Current US government position: lab leak "most likely" <span class="badge badge-evolving">Current Official Position</span></div>
+        <div class="card-body">The Trump administration published a formal White House report concluding a lab-related incident involving gain-of-function research is the most likely origin of COVID-19. It stated the "Proximal Origin" paper was "prompted by Dr. Fauci to push the preferred narrative." The report calls current gain-of-function oversight "severely convoluted."</div>
+        <a class="card-source" href="https://www.whitehouse.gov/lab-leak-true-origins-of-covid-19/" target="_blank">→ White House: Lab Leak — True Origins of COVID-19, 2025</a>
+      </div>
+      <div class="card">
+        <div class="card-label">German Intelligence · 2025</div>
+        <div class="card-title">BND report estimated 80–90% probability of lab leak</div>
+        <div class="card-body">German newspapers reported in 2025 that an unpublished 2020 Federal Intelligence Service (BND) report estimated an 80–90% probability of a lab leak. The German government subsequently requested an external review of the document, which was never officially published.</div>
+        <a class="card-source" href="https://en.wikipedia.org/wiki/COVID-19_lab_leak_theory" target="_blank">→ Wikipedia: COVID-19 Lab Leak Theory (citing German press, 2025)</a>
+      </div>
+      <div class="card">
+        <div class="card-label">Early Pandemic · Jan 2020</div>
+        <div class="card-title">Prof. Richard Ebright: genome consistent with either origin</div>
+        <div class="card-body">On Jan 31, 2020, biosecurity expert Prof. Richard Ebright (Rutgers) told <em>Science</em> that all genomic data on SARS-CoV-2 were "consistent with entry into the human population as either a natural accident or a laboratory accident" — making him one of the earliest credentialed scientists to raise the lab hypothesis publicly.</div>
+        <a class="card-source" href="https://en.wikipedia.org/wiki/COVID-19_lab_leak_theory" target="_blank">→ Science interview with Ebright, Jan 2020 (via Wikipedia)</a>
+      </div>
+    </div>
+
+    <div class="callout warn">
+      <strong>Key gap:</strong> China has not provided access to raw case data from late 2019, the Wuhan Institute of Virology's virus database (taken offline Sept 2019), or confirmed an intermediate animal host for natural origin. This information gap affects confidence in any conclusion.
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════════════
+       SECTION 2: GAIN OF FUNCTION
+  ══════════════════════════════════════════ -->
+  <section class="section" id="gain-of-function">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <h2 class="section-title">Gain-of-Function Research</h2>
+      <span class="section-sub">What it is, what happened, what's disputed</span>
+    </div>
+
+    <div class="callout">
+      <strong>What is gain-of-function (GoF) research?</strong> It refers to experiments that modify pathogens — usually viruses — to give them new or enhanced properties, such as increased transmissibility, virulence, or the ability to infect new host species. The term is contested: the NIH, researchers, and critics use different definitions, which is central to the Fauci dispute.
+    </div>
+
+    <div class="accordion">
+      <button class="accordion-btn" onclick="toggleAccordion(this)">Policy Timeline: GoF Moratoriums and Reversals <span class="chevron">▾</span></button>
+      <div class="accordion-body">
+        <div class="timeline">
+          <div class="tl-item">
+            <div class="tl-date">October 2014</div>
+            <div class="tl-text">President Obama places a <strong>moratorium on gain-of-function research</strong> of concern for viruses with pandemic potential, including influenza, SARS, and MERS.</div>
+          </div>
+          <div class="tl-item changed">
+            <div class="tl-date">June 2014 – ongoing during moratorium</div>
+            <div class="tl-text"><strong>NIAID (under Fauci) continued funding EcoHealth Alliance</strong> bat coronavirus research at the Wuhan Institute of Virology during the moratorium. An internal NIH review in July 2016 identified "possible gain-of-function concerns" in an EcoHealth/WIV experiment.</div>
+            <a class="tl-link" href="https://www.congress.gov/118/bills/sres718/BILLS-118sres718is.xml" target="_blank">→ US Senate Resolution 718, 118th Congress</a>
+          </div>
+          <div class="tl-item">
+            <div class="tl-date">January 2018</div>
+            <div class="tl-text">The NIH lifts the moratorium on GoF research of concern, replacing it with a new review framework (P3CO — Potential Pandemic Pathogen Care and Oversight).</div>
+          </div>
+          <div class="tl-item changed">
+            <div class="tl-date">September 2021</div>
+            <div class="tl-text">Documents obtained by <em>The Intercept</em> via FOIA show NIH-funded experiments at WIV created chimeric coronaviruses that replicated more quickly than the "parent" virus in humanized mouse lungs — <strong>meeting the US government's own 2014 definition of GoF of concern</strong>, according to some scientists.</div>
+            <a class="tl-link" href="https://theintercept.com/2021/09/09/covid-origins-gain-of-function-research/" target="_blank">→ The Intercept, Sept 2021</a>
+          </div>
+          <div class="tl-item changed">
+            <div class="tl-date">October 2021</div>
+            <div class="tl-text">A top NIH official admitted in a letter to Congress that NIH did fund research at WIV through EcoHealth Alliance <strong>that produced enhanced mouse-adapted virus results</strong> — directly contradicting Fauci's May 2021 testimony. NIH maintained the work did not meet its current GoF definition.</div>
+          </div>
+          <div class="tl-item">
+            <div class="tl-date">May 2024</div>
+            <div class="tl-text">NIH official Dr. Lawrence Tabak admitted to Congress that NIH funded GoF research in Wuhan through EcoHealth, contradicting Fauci's earlier testimony. He also said he would not support the same grant today.</div>
+            <a class="tl-link" href="https://oversight.house.gov/release/hearing-wrap-up-nih-repeatedly-refutes-ecohealth-alliance-president-dr-peter-daszaks-testimony-tabak-testimony-reveals-federal-grant-procedures-in-need-of-serious-reform/" target="_blank">→ House Oversight hearing wrap-up, May 2024</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="accordion">
+      <button class="accordion-btn" onclick="toggleAccordion(this)">The Definition Dispute: Who Is Right About "Gain-of-Function"? <span class="chevron">▾</span></button>
+      <div class="accordion-body">
+        <p style="margin-bottom:12px;">The core dispute hinges entirely on which definition of "gain-of-function" applies. There is no single universally accepted definition.</p>
+        <table class="compare-table">
+          <tr><th>Position</th><th>Argument</th><th>Who holds it</th><th>Source</th></tr>
+          <tr>
+            <td><strong>NIH/Fauci</strong></td>
+            <td>The EcoHealth/WIV work did not meet NIH's <em>current</em> GoF-of-concern definition because it wasn't expected to enhance transmissibility in humans</td>
+            <td>NIH, NIAID, Dr. Fauci, some virologists</td>
+            <td><a href="https://www.factcheck.org/2021/05/the-wuhan-lab-and-the-gain-of-function-disagreement/" target="_blank">FactCheck.org, 2021</a></td>
+          </tr>
+          <tr>
+            <td><strong>Critics</strong></td>
+            <td>The Obama-era 2014 definition <em>is</em> met: enhanced viral replication in humanized mice qualifies; NIH retroactively narrowed the definition</td>
+            <td>Sen. Rand Paul, Richard Ebright, The Intercept, some virologists incl. Ralph Baric's own lab</td>
+            <td><a href="https://theintercept.com/2021/09/09/covid-origins-gain-of-function-research/" target="_blank">The Intercept, 2021</a></td>
+          </tr>
+          <tr>
+            <td><strong>Neutral assessment</strong></td>
+            <td>Whether the work was GoF "depends on your definition" — the definitional ambiguity is itself a policy failure</td>
+            <td>Dr. Lawrence Tabak (NIH, 2023), independent analysts</td>
+            <td><a href="https://oversight.house.gov/release/hearing-wrap-up-nih-repeatedly-refutes-ecohealth-alliance-president-dr-peter-daszaks-testimony-tabak-testimony-reveals-federal-grant-procedures-in-need-of-serious-reform/" target="_blank">House Oversight, 2024</a></td>
+          </tr>
+        </table>
+        <div class="footnote">Note: Ralph Baric, an EcoHealth collaborator and leading coronavirus expert, privately acknowledged the research "appeared to meet the standard criteria for gain-of-function research" in internal correspondence reviewed by Congress.</div>
+      </div>
+    </div>
+
+    <div class="accordion">
+      <button class="accordion-btn" onclick="toggleAccordion(this)">DARPA Proposal (2018): The Rejected Plan <span class="chevron">▾</span></button>
+      <div class="accordion-body">
+        <p>In early 2018, EcoHealth Alliance submitted a proposal to DARPA called DEFUSE, which proposed inoculating wild bats in China with chimeric coronavirus spike proteins. DARPA <strong>rejected the proposal</strong>, citing biosafety concerns. The proposal was leaked in 2021 and raised questions about whether similar work was pursued through other funding streams.</p>
+        <br>
+        <p>Critics note the proposal included plans to remove furin cleavage sites from bat coronaviruses — the very feature that makes SARS-CoV-2 uniquely dangerous and that has not been found in close bat coronavirus relatives.</p>
+        <br>
+        <a href="https://www.asbmb.org/asbmb-today/policy/112121/gain-of-function-research-all-in-the-eye-of-the-be" target="_blank" style="color:var(--accent);font-size:12px;">→ ASBMB coverage of DARPA proposal, 2021</a>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════════════
+       SECTION 3: FAUCI / NIH
+  ══════════════════════════════════════════ -->
+  <section class="section" id="fauci">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <h2 class="section-title">Fauci, NIH & the Origins Debate</h2>
+      <span class="section-sub">Documented connections, testimony, and contested claims</span>
+    </div>
+
+    <div class="callout warn">
+      <strong>Methodology note:</strong> This section separates <em>documented facts</em> (emails, congressional testimony, official records) from <em>interpretations</em> and <em>allegations</em>. Both are sourced and labeled.
+    </div>
+
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-date">June 2014</div>
+        <div class="tl-text"><strong>NIAID (Fauci's agency) awards $3.75M grant to EcoHealth Alliance</strong> to study bat coronavirus emergence risk. EcoHealth subcontracts work to the Wuhan Institute of Virology. Approximately 10,000 bats and 2,000 other mammals are sampled across 47 sites.</div>
+        <a class="tl-link" href="https://www.washingtonexaminer.com/policy/healthcare/4617091/timeline-fauci-involvement-covid-origins-debate/" target="_blank">→ Washington Examiner timeline, 2026</a>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">January 27, 2020</div>
+        <div class="tl-text">Fauci receives internal talking points from his chief of staff noting that NIAID had been funding EcoHealth Alliance's WIV research "for the past 5 years." The email detailed the research findings involving bat coronaviruses.</div>
+        <a class="tl-link" href="https://www.nationalreview.com/news/fauci-knew-nih-funded-wuhans-gain-of-function-research-as-pandemic-began-email-reveals/amp/" target="_blank">→ National Review reporting on email, 2023</a>
+      </div>
+      <div class="tl-item changed">
+        <div class="tl-date">February 1, 2020</div>
+        <div class="tl-text">Heavily redacted emails (released via FOIA) show Fauci held a call with virologists including Kristian Andersen, who had privately told Fauci the virus looked potentially engineered. The "Proximal Origin" paper — which concluded natural origin — was written and published within weeks. <strong>Allegation:</strong> Fauci prompted the paper to counter the lab-leak hypothesis.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">March 2020</div>
+        <div class="tl-text">"The Proximal Origin of SARS-CoV-2" published in <em>Nature Medicine</em>. It becomes the most cited paper arguing against lab origin. It is repeatedly cited by public health officials and media to dismiss lab-leak theories.</div>
+        <a class="tl-link" href="https://www.nature.com/articles/s41591-020-0820-9" target="_blank">→ Andersen et al., Nature Medicine, 2020</a>
+      </div>
+      <div class="tl-item contested">
+        <div class="tl-date">May 11, 2021</div>
+        <div class="tl-text">Fauci testifies before Congress: <em>"The NIH has not ever and does not now fund gain-of-function research in the Wuhan Institute of Virology."</em> Sen. Rand Paul repeatedly challenged this claim.</div>
+      </div>
+      <div class="tl-item contested">
+        <div class="tl-date">May 2021</div>
+        <div class="tl-text">Fauci concedes it is <em>"impossible to guarantee"</em> that WIV researchers did not use American funds for GoF research between 2014–2017 — a notable softening.</div>
+        <a class="tl-link" href="https://www.congress.gov/118/bills/sres718/BILLS-118sres718is.xml" target="_blank">→ US Senate Resolution 718</a>
+      </div>
+      <div class="tl-item changed">
+        <div class="tl-date">October 2021</div>
+        <div class="tl-text">NIH official admits in letter to Congress that NIH <em>did</em> fund research at WIV producing enhanced bat coronaviruses — contradicting Fauci's May testimony. NIH insisted it still did not meet their definition of GoF research.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-date">January 2024</div>
+        <div class="tl-text">Fauci testifies privately before the House Select Subcommittee for 14 hours. Transcript later released. He maintains his prior positions on GoF definitions and origins while acknowledging the 6-foot social distancing rule was not based on scientific studies.</div>
+        <a class="tl-link" href="https://www.science.org/content/article/house-panel-concludes-covid-19-pandemic-came-lab-leak" target="_blank">→ Science reporting, 2024</a>
+      </div>
+      <div class="tl-item contested">
+        <div class="tl-date">June 2025</div>
+        <div class="tl-text">The Trump White House report states the "Proximal Origin" paper was <strong>"prompted by Dr. Fauci to push the preferred narrative that COVID-19 originated in nature."</strong> This is labeled an allegation by the administration — the paper's authors have denied being pressured.</div>
+        <a class="tl-link" href="https://www.whitehouse.gov/lab-leak-true-origins-of-covid-19/" target="_blank">→ White House Report, June 2025</a>
+      </div>
+    </div>
+
+    <div class="callout danger">
+      <strong>What is documented vs. alleged:</strong> It is <em>documented</em> that NIAID funded EcoHealth → WIV research, that Fauci was aware of this in Jan 2020, and that an NIH letter contradicted his May 2021 testimony. It is <em>alleged but unproven</em> that he directly ordered the Proximal Origin paper or that he knowingly misled Congress about GoF definitions.
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════════════
+       SECTION 4: VACCINES
+  ══════════════════════════════════════════ -->
+  <section class="section" id="vaccines">
+    <div class="section-header">
+      <span class="section-num">04</span>
+      <h2 class="section-title">COVID-19 Vaccines</h2>
+      <span class="section-sub">Efficacy, safety signals, changing guidance</span>
+    </div>
+
+    <h3 style="font-size:14px;font-weight:600;color:var(--text);margin:0 0 14px;">Initial Clinical Trial Efficacy (RCT results, 2020–2021)</h3>
+    <div class="data-bars">
+      <div class="data-bar-row">
+        <div class="data-bar-label">Pfizer-BioNTech (BNT162b2)</div>
+        <div class="data-bar-track"><div class="data-bar-fill" style="width:95%"></div></div>
+        <div class="data-bar-val">95%</div>
+      </div>
+      <div class="data-bar-row">
+        <div class="data-bar-label">Moderna (mRNA-1273)</div>
+        <div class="data-bar-track"><div class="data-bar-fill" style="width:94%"></div></div>
+        <div class="data-bar-val">94%</div>
+      </div>
+      <div class="data-bar-row">
+        <div class="data-bar-label">AstraZeneca (ChAdOx1)</div>
+        <div class="data-bar-track"><div class="data-bar-fill amber" style="width:67%"></div></div>
+        <div class="data-bar-val">67%</div>
+      </div>
+      <div class="data-bar-row">
+        <div class="data-bar-label">Johnson & Johnson (Ad26)</div>
+        <div class="data-bar-track"><div class="data-bar-fill amber" style="width:67%"></div></div>
+        <div class="data-bar-val">67%</div>
+      </div>
+      <div class="data-bar-row">
+        <div class="data-bar-label">Sinopharm (BBIBP-CorV)</div>
+        <div class="data-bar-track"><div class="data-bar-fill amber" style="width:78%"></div></div>
+        <div class="data-bar-val">78%</div>
+      </div>
+      <div class="data-bar-row">
+        <div class="data-bar-label">Sinovac (CoronaVac)</div>
+        <div class="data-bar-track"><div class="data-bar-fill red" style="width:51%"></div></div>
+        <div class="data-bar-val">51%</div>
+      </div>
+    </div>
+    <div class="footnote">Source: <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8951318/" target="_blank" style="color:var(--accent)">COVID-19 Vaccine Effectiveness Review, NCBI/PMC, 2022</a> | Efficacy against symptomatic infection, original strain, fully vaccinated</div>
+
+    <h3 style="font-size:14px;font-weight:600;color:var(--text);margin:20px 0 14px;">Real-World Effectiveness vs. Variants (vs. symptomatic infection)</h3>
+    <div class="data-bars">
+      <div class="data-bar-row">
+        <div class="data-bar-label">Pfizer vs. Alpha (fully vacc.)</div>
+        <div class="data-bar-track"><div class="data-bar-fill" style="width:89%"></div></div>
+        <div class="data-bar-val">89–97%</div>
+      </div>
+      <div class="data-bar-row">
+        <div class="data-bar-label">Pfizer vs. Delta (fully vacc.)</div>
+        <div class="data-bar-track"><div class="data-bar-fill amber" style="width:88%"></div></div>
+        <div class="data-bar-val">88%</div>
+      </div>
+      <div class="data-bar-row">
+        <div class="data-bar-label">AZ vs. Delta (fully vacc.)</div>
+        <div class="data-bar-track"><div class="data-bar-fill amber" style="width:67%"></div></div>
+        <div class="data-bar-val">67%</div>
+      </div>
+    </div>
+    <div class="footnote">Source: <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8708265/" target="_blank" style="color:var(--accent)">WHO-Authorized COVID-19 Vaccines Rapid Review, NCBI, 2021</a></div>
+
+    <h3 style="font-size:14px;font-weight:600;color:var(--text);margin:20px 0 14px;">Safety Signals: Myocarditis</h3>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-label">FDA Warning · 2023–2024</div>
+        <div class="card-title">FDA required updated myocarditis warning labels on mRNA vaccines</div>
+        <div class="card-body">The FDA required Pfizer and Moderna to update their myocarditis/pericarditis warnings to include estimated incidence rates and cardiac MRI study results. Symptoms most commonly begin within 10 days of vaccination. Both manufacturers are required to conduct long-term heart effect studies.</div>
+        <a class="card-source" href="https://www.fda.gov/vaccines-blood-biologics/safety-availability-biologics/fda-approves-required-updated-warning-labeling-mrna-covid-19-vaccines-regarding-myocarditis-and" target="_blank">→ FDA official notice</a>
+      </div>
+      <div class="card">
+        <div class="card-label">Peer-Reviewed · NCBI, 2023</div>
+        <div class="card-title">Myocarditis in young males: rates higher than VAERS suggests</div>
+        <div class="card-body">A systematic review found myocarditis rates in young males higher than VAERS passive reporting indicated. The Vaccine Safety Datalink reported ~13–15 cases per 100,000 doses for males aged 12–17 after Pfizer dose 2. Most cases were mild; no fatal cases were confirmed in Oregon surveillance through 2022.</div>
+        <a class="card-source" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9880674/" target="_blank">→ NCBI/PMC systematic review, 2023</a>
+      </div>
+      <div class="card">
+        <div class="card-label">Context: COVID vs. Vaccine Risk</div>
+        <div class="card-title">COVID-19 infection causes far more myocarditis than vaccination</div>
+        <div class="card-body">A CDC study estimated COVID-19 infection caused approximately 150 myocarditis cases per 100,000 people — compared to roughly 2–15 per 100,000 from vaccination. Risk-benefit analyses consistently show vaccination reduces overall myocarditis risk, especially in older populations. Young male risk-benefit is more nuanced.</div>
+        <a class="card-source" href="https://www.nationalacademies.org/read/27746/chapter/9" target="_blank">→ National Academies of Sciences review, 2024</a>
+      </div>
+    </div>
+
+    <div class="callout warn">
+      <strong>Active surveillance caveat:</strong> VAERS is a passive reporting system — adverse events are likely underreported. Active surveillance studies (Vaccine Safety Datalink) have consistently found higher rates than VAERS. This applies to both over- and under-detection depending on the adverse event type.
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════════════
+       SECTION 5: MASKS
+  ══════════════════════════════════════════ -->
+  <section class="section" id="masks">
+    <div class="section-header">
+      <span class="section-num">05</span>
+      <h2 class="section-title">Mask Efficacy</h2>
+      <span class="section-sub">What the evidence actually says — including conflicts</span>
+    </div>
+
+    <div class="callout">
+      <strong>The core tension:</strong> Lab tests show masks can physically block respiratory droplets. But randomized controlled trials (RCTs) — the gold standard — have consistently failed to show statistically significant community benefit from mask <em>interventions</em>. Observational studies are mixed and heavily confounded. N95 respirators in healthcare settings show the strongest evidence.
+    </div>
+
+    <table class="compare-table" style="margin-bottom:20px;">
+      <tr>
+        <th>Study Type</th>
+        <th>Conclusion on Community Masking</th>
+        <th>Strength</th>
+        <th>Source</th>
+      </tr>
+      <tr>
+        <td><strong>Cochrane Review (RCTs only)</strong><br><small>2023 — 78 trials, 11 new</small></td>
+        <td class="con">Wearing a mask "may make little to no difference" in how many people caught COVID-like illness. RCT evidence does not support community masking mandates.</td>
+        <td>High (systematic review of RCTs)</td>
+        <td><a href="https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD006207.pub6/full" target="_blank">Jefferson et al., Cochrane, 2023</a></td>
+      </tr>
+      <tr>
+        <td><strong>RCT meta-analysis</strong><br><small>6 RCTs, 2019–2023</small></td>
+        <td class="con">Surgical masks showed little difference in prevention. N95 respirators showed significant protective effect (OR 0.03, p&lt;0.01).</td>
+        <td>Moderate-High</td>
+        <td><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10509348/" target="_blank">NCBI/PMC meta-analysis, 2023</a></td>
+      </tr>
+      <tr>
+        <td><strong>NCBI Narrative Review</strong><br><small>2024</small></td>
+        <td class="con">Promotion of masking was "based not primarily on strength of evidence but on imperative to act." RCTs have shown no benefit (except possible N95 benefit for hospital workers).</td>
+        <td>Moderate</td>
+        <td><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11077603/" target="_blank">NCBI/PMC, 2024</a></td>
+      </tr>
+      <tr>
+        <td><strong>Observational studies (general)</strong><br><small>35 community studies, 2020–2023</small></td>
+        <td class="pro">91% had critical risk of bias. Some suggested benefit from mask policies, but most failed to isolate mask effects from concurrent measures.</td>
+        <td>Low (high confounding)</td>
+        <td><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10446908/" target="_blank">Systematic review, NCBI/PMC, 2023</a></td>
+      </tr>
+      <tr>
+        <td><strong>Bangladesh cluster RCT</strong><br><small>2022</small></td>
+        <td class="pro">Surgical mask distribution modestly reduced COVID-like illness in villages by ~11%. One of the only large RCTs showing community benefit.</td>
+        <td>Moderate (field RCT)</td>
+        <td><a href="https://www.science.org/doi/10.1126/science.abi9069" target="_blank">Abaluck et al., Science, 2022</a></td>
+      </tr>
+      <tr>
+        <td><strong>Lab aerosol studies</strong></td>
+        <td class="pro">Masks physically block droplet and aerosol particles in controlled conditions. N95 blocks 95%+ of particles. Surgical masks less effective against aerosols.</td>
+        <td>Strong (lab only; doesn't capture real-world compliance)</td>
+        <td><a href="https://www.cdc.gov/coronavirus/2019-ncov/science/science-briefs/masking-science-sars-cov2.html" target="_blank">CDC Science Brief</a></td>
+      </tr>
+    </table>
+
+    <div class="callout warn">
+      <strong>Why RCTs and lab data conflict:</strong> Lab tests measure physical filtration under ideal conditions. RCTs measure real-world use — where masks are removed to eat, worn loosely, touched repeatedly, or used inconsistently. The gap between "masks can block particles" and "mask interventions reduce community infection rates" is where the scientific debate lives.
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════════════
+       SECTION 6: CHANGED FACTS TIMELINE
+  ══════════════════════════════════════════ -->
+  <section class="section" id="changed-facts">
+    <div class="section-header">
+      <span class="section-num">06</span>
+      <h2 class="section-title">Facts That Changed Over Time</h2>
+      <span class="section-sub">Official positions that were later reversed, revised, or contradicted</span>
+    </div>
+
+    <div class="callout">These represent instances where official guidance or stated scientific consensus shifted significantly. They are not evidence of conspiracy — science updates — but some shifts are more concerning than others.</div>
+
+    <div class="timeline">
+      <div class="tl-item changed">
+        <div class="tl-date">Early 2020 → Later 2020</div>
+        <div class="tl-text"><strong>Masks: "Not recommended" → Mandated.</strong> In Feb–March 2020, the US Surgeon General and WHO advised the public NOT to wear masks, partly to preserve supply for healthcare workers. By April 2020, the CDC reversed course and recommended masks for all. Later, mask mandates became widespread.</div>
+      </div>
+      <div class="tl-item changed">
+        <div class="tl-date">2020 → 2024</div>
+        <div class="tl-text"><strong>6-foot social distancing.</strong> The 6-foot rule became a cornerstone of pandemic policy. In his Jan 2024 congressional testimony, Fauci acknowledged this guideline was "not based on scientific studies or data" and appeared in CDC guidance based on judgment calls, not RCT evidence.</div>
+      </div>
+      <div class="tl-item changed">
+        <div class="tl-date">2020–2021 → 2022</div>
+        <div class="tl-text"><strong>Natural immunity.</strong> For much of 2020–2021, CDC guidance did not recognize natural immunity from prior infection as equivalent to vaccination. By 2022, studies (including in <em>Science</em>) showed hybrid immunity (infection + vaccination) was superior to either alone. The CDC eventually updated guidance.</div>
+      </div>
+      <div class="tl-item changed">
+        <div class="tl-date">2020 → 2021</div>
+        <div class="tl-text"><strong>Lab leak "debunked" → officially plausible.</strong> In 2020, the lab leak hypothesis was widely dismissed as a conspiracy theory by media and some scientists. By 2021, the Biden administration acknowledged it warranted serious investigation. By 2023–2025, multiple US intelligence agencies moved to "lab leak likely."</div>
+      </div>
+      <div class="tl-item changed">
+        <div class="tl-date">2021 → 2022</div>
+        <div class="tl-text"><strong>Vaccine prevents transmission → reduces transmission.</strong> Initial messaging strongly implied mRNA vaccines prevented infection and transmission. As data from Delta and Omicron waves showed vaccinated people could still contract and transmit COVID, messaging shifted to emphasis on severe disease prevention.</div>
+      </div>
+      <div class="tl-item changed">
+        <div class="tl-date">2021 → 2023</div>
+        <div class="tl-text"><strong>Vaccine myocarditis: "extremely rare" → required label update.</strong> Initial CDC messaging called post-vaccine myocarditis "extremely rare and mild." By 2023–2024, active surveillance found higher rates than VAERS passive reporting showed, and the FDA required manufacturers to formally update warning labels with incidence data.</div>
+        <a class="tl-link" href="https://www.fda.gov/vaccines-blood-biologics/safety-availability-biologics/fda-approves-required-updated-warning-labeling-mrna-covid-19-vaccines-regarding-myocarditis-and" target="_blank">→ FDA notice, 2024</a>
+      </div>
+      <div class="tl-item changed">
+        <div class="tl-date">2021 → 2023</div>
+        <div class="tl-text"><strong>NIH on GoF: "We didn't fund it" → "It depends on your definition."</strong> Fauci's categorical May 2021 denial gave way to NIH's Oct 2021 letter acknowledging enhanced viral results, and then to Dr. Tabak's 2024 Congressional admission that the definition question was the crux — not a factual dispute.</div>
+      </div>
+      <div class="tl-item changed">
+        <div class="tl-date">2021 → 2022</div>
+        <div class="tl-text"><strong>Booster timing.</strong> The initial CDC plan called for boosters at 8 months post-primary series. This was shortened to 5 months, then 3 months, with recommendations shifting based on waning immunity data that emerged faster than anticipated.</div>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════════════
+       SECTION 7: CONFLICTING DATA
+  ══════════════════════════════════════════ -->
+  <section class="section" id="conflicts">
+    <div class="section-header">
+      <span class="section-num">07</span>
+      <h2 class="section-title">Head-to-Head: Conflicting Accounts</h2>
+      <span class="section-sub">Competing credible claims placed side by side</span>
+    </div>
+
+    <div class="accordion">
+      <button class="accordion-btn" onclick="toggleAccordion(this)">Did the Proximal Origin paper suppress the lab-leak debate? <span class="chevron">▾</span></button>
+      <div class="accordion-body">
+        <table class="compare-table">
+          <tr><th>Claim</th><th>Evidence For</th><th>Evidence Against</th></tr>
+          <tr>
+            <td><strong>Paper was orchestrated by Fauci to suppress lab leak</strong></td>
+            <td>Emails show Fauci's team organized a call Feb 1, 2020 with the future authors; Andersen had privately told Fauci the virus looked "potentially engineered" days before; paper appeared unusually fast; White House 2025 report states this directly.</td>
+            <td>Authors (Andersen, Garry et al.) deny pressure; say their conclusions reflect genuine scientific reassessment; FOIA emails show deliberative process, not proof of orders; peer review was conducted.</td>
+          </tr>
+        </table>
+        <div class="footnote">Primary documents: <a href="https://www.nationalreview.com/news/fauci-knew-nih-funded-wuhans-gain-of-function-research-as-pandemic-began-email-reveals/amp/" target="_blank">Fauci emails (National Review)</a> · <a href="https://www.nature.com/articles/s41591-020-0820-9" target="_blank">Proximal Origin paper</a></div>
+      </div>
+    </div>
+
+    <div class="accordion">
+      <button class="accordion-btn" onclick="toggleAccordion(this)">Did COVID-19 vaccines prevent transmission? <span class="chevron">▾</span></button>
+      <div class="accordion-body">
+        <table class="compare-table">
+          <tr><th>Position</th><th>Key Evidence</th><th>Source</th></tr>
+          <tr>
+            <td><strong>Yes, initially (original strain)</strong></td>
+            <td class="pro">Real-world data from Israel and UK in 2021 showed vaccinated individuals less likely to test positive and less likely to spread virus to household contacts during Alpha wave.</td>
+            <td><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8708265/" target="_blank">WHO rapid review, 2021</a></td>
+          </tr>
+          <tr>
+            <td><strong>No / greatly reduced (Delta, Omicron)</strong></td>
+            <td class="con">Vaccinated individuals could contract and transmit Delta and Omicron. CDC data from late 2021 showed significant breakthrough infections. A Pfizer EU official admitted in 2022 that the vaccine was never tested for preventing transmission before authorization.</td>
+            <td><a href="https://www.europarl.europa.eu/committees/en/coovi/home/highlights" target="_blank">EU Parliament hearings, 2022</a></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="accordion">
+      <button class="accordion-btn" onclick="toggleAccordion(this)">Are mRNA vaccines safe in the long term? <span class="chevron">▾</span></button>
+      <div class="accordion-body">
+        <table class="compare-table">
+          <tr><th>Position</th><th>Evidence</th><th>Source</th></tr>
+          <tr>
+            <td><strong>Generally safe; benefit outweighs risk for most</strong></td>
+            <td class="pro">Hundreds of millions of doses administered; serious adverse events remain rare relative to vaccine doses delivered; COVID-19 infection carries far higher myocarditis risk than vaccines; multiple surveillance systems (VAERS, VSD, FDA) show no unknown mass safety signals.</td>
+            <td><a href="https://www.cdc.gov/vaccine-safety/vaccines/covid-19.html" target="_blank">CDC Vaccine Safety page</a></td>
+          </tr>
+          <tr>
+            <td><strong>Long-term unknowns; certain subgroups at risk</strong></td>
+            <td class="con">No mRNA vaccine had ever been approved for humans before 2020; myocarditis rates in young males higher than initially communicated; FDA-required long-term cardiac studies not yet complete; VAERS passive reporting likely undercounts adverse events.</td>
+            <td><a href="https://www.nationalacademies.org/read/27746/chapter/9" target="_blank">National Academies, 2024</a></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="accordion">
+      <button class="accordion-btn" onclick="toggleAccordion(this)">Was the Huanan Market truly the origin point? <span class="chevron">▾</span></button>
+      <div class="accordion-body">
+        <table class="compare-table">
+          <tr><th>Position</th><th>Key Evidence</th><th>Source</th></tr>
+          <tr>
+            <td><strong>Yes — market was early epicenter</strong></td>
+            <td class="pro">Worobey et al. (Science, 2022): earliest confirmed cases geographically concentrated around Huanan market. Environmental samples from market tested positive for SARS-CoV-2. Animal vendors linked to early cases.</td>
+            <td><a href="https://www.science.org/doi/10.1126/science.abp8337" target="_blank">Worobey et al., Science, 2022</a></td>
+          </tr>
+          <tr>
+            <td><strong>Market may have been an amplification site, not origin</strong></td>
+            <td class="con">Critics note that if the virus spread from WIV (near the market), early cases would still cluster near the market. A lab-origin virus could have seeded the market, not the reverse. The WIV database taken offline in Sept 2019 contained 22,000 bat virus samples.</td>
+            <td><a href="https://oversight.house.gov/release/covid-origins-hearing-wrap-up-facts-science-evidence-point-to-a-wuhan-lab-leak%EF%BF%BC/" target="_blank">House Oversight, 2023</a></td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════════════
+       SECTION NEW-A: VACCINE HARMS
+  ══════════════════════════════════════════ -->
+  <section class="section" id="vaccine-harm">
+    <div class="section-header">
+      <span class="section-num">05B</span>
+      <h2 class="section-title">Vaccine Harms, Heart Attacks & Deaths</h2>
+      <span class="section-sub">Documented adverse events, signal detection, and what the evidence does and doesn't show</span>
+    </div>
+
+    <div class="callout warn">
+      <strong>How to read this section:</strong> VAERS (Vaccine Adverse Event Reporting System) reports are <em>not confirmed causal links</em> — anyone can file a report after any event following vaccination. VAERS is designed for signal detection only. Active surveillance systems (Vaccine Safety Datalink, clinical studies) provide stronger evidence of causation. Both are included here.
+    </div>
+
+    <h3 style="font-size:14px;font-weight:600;color:var(--text);margin:0 0 14px;">VAERS: Scale & Limitations</h3>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-label">VAERS Data · Through June 2023</div>
+        <div class="card-title">1.57 million adverse event reports, including 35,487 reported deaths</div>
+        <div class="card-body">As of June 16, 2023, VAERS included 1,569,668 adverse event reports associated with COVID-19 vaccines — including 35,487 death reports, 27,229 myocarditis/pericarditis reports, and 20,184 heart attack reports. <strong>Critical caveat:</strong> VAERS death reports do not indicate the vaccine caused the death. They record deaths that occurred after vaccination regardless of cause. Correlation ≠ causation in passive reporting systems.</div>
+        <a class="card-source" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12450757/" target="_blank">→ Autopsy findings in fatal vaccine-induced myocarditis, NCBI/PMC, 2023</a>
+      </div>
+      <div class="card">
+        <div class="card-label">VAERS Design · CDC/FDA</div>
+        <div class="card-title">VAERS is a passive reporting system — events are likely underreported AND reports ≠ causation</div>
+        <div class="card-body">The CDC and FDA co-manage VAERS. It is an early warning system, not a causal database. Healthcare providers are required by law to report certain adverse events; anyone can submit a report. FDA uses VAERS data alongside active surveillance (VSD, BEST network) to identify signals that require investigation. VAERS data alone cannot establish that a vaccine caused an adverse event.</div>
+        <a class="card-source" href="https://www.cdc.gov/vaccine-safety/vaccines/covid-19.html" target="_blank">→ CDC COVID-19 Vaccine Safety page</a>
+      </div>
+    </div>
+
+    <h3 style="font-size:14px;font-weight:600;color:var(--text);margin:20px 0 14px;">Confirmed Serious Adverse Events (Causation Established)</h3>
+    <table class="compare-table">
+      <tr>
+        <th>Adverse Event</th>
+        <th>Vaccine(s)</th>
+        <th>Estimated Rate</th>
+        <th>Status</th>
+        <th>Source</th>
+      </tr>
+      <tr>
+        <td><strong>Myocarditis / Pericarditis</strong></td>
+        <td>mRNA (Pfizer, Moderna)</td>
+        <td>~2–15 per 100,000 doses in males 12–29; highest after Moderna dose 2</td>
+        <td class="con">Confirmed causal link. FDA updated warning labels 2024. Long-term cardiac studies ongoing.</td>
+        <td><a href="https://www.fda.gov/vaccines-blood-biologics/safety-availability-biologics/fda-approves-required-updated-warning-labeling-mrna-covid-19-vaccines-regarding-myocarditis-and" target="_blank">FDA, 2024</a></td>
+      </tr>
+      <tr>
+        <td><strong>VITT (Vaccine-Induced Immune Thrombotic Thrombocytopenia)</strong></td>
+        <td>AstraZeneca (ChAdOx1), J&J (Ad26) — adenoviral vector vaccines</td>
+        <td>~1 per 100,000–150,000 doses; 18 fatal cases among 34M doses in EU by April 2021</td>
+        <td class="con">Confirmed causal link. Led to suspension of AstraZeneca in many countries for under-60s. Most cases: cerebral venous sinus thrombosis (CVST) within 2 weeks of dose 1.</td>
+        <td><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10655150/" target="_blank">NCBI/PMC VITT review, 2023</a></td>
+      </tr>
+      <tr>
+        <td><strong>Anaphylaxis</strong></td>
+        <td>All COVID-19 vaccines</td>
+        <td>~2–5 per million doses; typically within 15–30 min of injection</td>
+        <td class="con">Confirmed. Reason for post-vaccination 15-minute observation periods. Treatable with epinephrine.</td>
+        <td><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10363417/" target="_blank">WHO Western Pacific region AEFI study, 2023</a></td>
+      </tr>
+      <tr>
+        <td><strong>Guillain-Barré Syndrome (GBS)</strong></td>
+        <td>J&J (Ad26) primarily; rare with mRNA</td>
+        <td>~7–8 per million doses (J&J); rate significantly lower with mRNA vaccines</td>
+        <td class="con">FDA added GBS warning to J&J vaccine label July 2021. Causal link considered probable for J&J.</td>
+        <td><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10363417/" target="_blank">WHO AEFI surveillance, 2023</a></td>
+      </tr>
+    </table>
+
+    <h3 style="font-size:14px;font-weight:600;color:var(--text);margin:20px 0 14px;">Sudden Death & Cardiac Arrest: What Studies Show</h3>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-label">MMWR · Oregon Study · April 2024</div>
+        <div class="card-title">No confirmed vaccine-attributed sudden cardiac deaths in young people (Oregon, 2021–2022)</div>
+        <div class="card-body">Among 1,292 deaths of Oregonians aged 16–30 with cardiac-related cause entries (2021–2022), only 3 occurred within 100 days of mRNA vaccination — 2 were attributed to chronic conditions, 1 cause undetermined. No death certificate attributed death directly to vaccination. The study found no evidence linking mRNA vaccines to sudden cardiac death in previously healthy young people.</div>
+        <a class="card-source" href="https://www.cdc.gov/mmwr/volumes/73/wr/mm7314a5.htm" target="_blank">→ Liko & Cieslak, MMWR, April 2024</a>
+      </div>
+      <div class="card">
+        <div class="card-label">National Academies · 2024</div>
+        <div class="card-title">Clinical trial data submitted to FDA showed no sudden death signal</div>
+        <div class="card-body">The National Academies of Sciences, Engineering, and Medicine evidence review (2024) found that clinical trial results submitted to the FDA for Emergency Use Authorization for all COVID-19 vaccines "do not indicate a signal regarding sudden death." An Australian population study of 4.49 million people aged 5–50 also found no association between vaccination and sudden cardiac arrest within 30 days of vaccination.</div>
+        <a class="card-source" href="https://www.nationalacademies.org/read/27746/chapter/9" target="_blank">→ National Academies evidence review, 2024</a>
+      </div>
+      <div class="card">
+        <div class="card-label">PLOS Medicine · Ontario Study · 2026</div>
+        <div class="card-title">Population-based case-control study: sudden death and vaccination in under-50s</div>
+        <div class="card-body">A large population-based case-control study in Ontario (April 2021–June 2023) examined sudden cardiac death in people under 50 without known cardiovascular disease. Study matched cases with controls on age, sex, and region. Results assessed cardiac arrest risk in windows around vaccination. Published March 2026 in PLOS Medicine — one of the most rigorous designs applied to this question to date.</div>
+        <a class="card-source" href="https://journals.plos.org/plosmedicine/article?id=10.1371%2Fjournal.pmed.1004924" target="_blank">→ PLOS Medicine case-control study, 2026</a>
+      </div>
+    </div>
+
+    <h3 style="font-size:14px;font-weight:600;color:var(--text);margin:20px 0 14px;">AstraZeneca VITT: A Confirmed Harm in Detail</h3>
+    <div class="accordion">
+      <button class="accordion-btn" onclick="toggleAccordion(this)">What happened with AstraZeneca blood clots? <span class="chevron">▾</span></button>
+      <div class="accordion-body">
+        <p style="margin-bottom:12px;">VITT (Vaccine-Induced Immune Thrombotic Thrombocytopenia) is a rare but serious syndrome uniquely associated with adenoviral-vector COVID vaccines (AstraZeneca and J&J). It was confirmed by the European Medicines Agency (EMA) in April 2021.</p>
+        <div class="timeline">
+          <div class="tl-item">
+            <div class="tl-date">March 11, 2021</div>
+            <div class="tl-text">Denmark, Norway, and other European nations temporarily suspend AstraZeneca amid reports of blood clots and at least one death. EMA initially says no evidence of a link.</div>
+          </div>
+          <div class="tl-item changed">
+            <div class="tl-date">April 7, 2021</div>
+            <div class="tl-text"><strong>EMA PRAC officially concludes:</strong> unusual blood clots with low platelet levels are a "very rare" adverse event of AstraZeneca vaccine. 222 cases of cerebral venous thrombosis out of 34 million doses — rate approximately 1:150,000. Most cases in women under 60 within 2 weeks of dose 1. 18 deaths confirmed among EU cases.</div>
+            <a class="tl-link" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8239516/" target="_blank">→ EMA PRAC statement; NCBI review, 2021</a>
+          </div>
+          <div class="tl-item">
+            <div class="tl-date">2021–2022</div>
+            <div class="tl-text">Multiple countries restricted AstraZeneca to over-60s or eliminated it from national programs. UK, Germany, Canada, and others shifted younger populations to mRNA vaccines. VITT is strongly associated with adenoviral vectors (AstraZeneca: 95% of cases; J&J: 4%). mRNA vaccines account for &lt;0.5% of VITT cases.</div>
+            <a class="tl-link" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10655150/" target="_blank">→ VITT systematic review, NCBI/PMC, 2023</a>
+          </div>
+          <div class="tl-item">
+            <div class="tl-date">2024</div>
+            <div class="tl-text">AstraZeneca voluntarily withdrew its COVID-19 vaccine from global markets in May 2024, citing commercial reasons — the company said surplus of updated mRNA vaccines made demand insufficient. This decision sparked renewed public debate about the VITT risk despite the withdrawal being unrelated to any new safety finding.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <strong>Net risk perspective from official bodies:</strong> For the vast majority of age groups and health profiles, the risk of serious harm from COVID-19 infection (including myocarditis from infection itself, which occurs at ~150 per 100,000) substantially exceeds the confirmed risks from vaccination. However, for specific subgroups — particularly young males (myocarditis), young women (VITT from AstraZeneca) — the risk-benefit calculus is closer and was the basis for country-specific recommendations.
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════════════
+       SECTION NEW-B: DEATH COUNTS
+  ══════════════════════════════════════════ -->
+  <section class="section" id="death-counts">
+    <div class="section-header">
+      <span class="section-num">06B</span>
+      <h2 class="section-title">COVID-19 Death Counts</h2>
+      <span class="section-sub">How deaths were counted, what's disputed, and what excess mortality reveals</span>
+    </div>
+
+    <div class="callout">
+      <strong>The two-sided problem:</strong> Official COVID death counts likely <em>undercounted</em> total pandemic deaths (many people died without testing), while also including some deaths <em>with</em> COVID as a contributing factor rather than the primary cause. Excess mortality analysis is considered the most objective measure but has its own methodological limitations.
+    </div>
+
+    <h3 style="font-size:14px;font-weight:600;color:var(--text);margin:0 0 14px;">How Deaths Were Counted: The Methodology</h3>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-label">CDC / NCHS · ICD-10 Code U07.1</div>
+        <div class="card-title">Deaths coded to U07.1 when COVID-19 is reported as contributing to death — including "probable" cases without lab confirmation</div>
+        <div class="card-body">The CDC/NCHS uses ICD-10 code U07.1 for COVID-19 deaths. Critically: deaths were coded as COVID-19 when a certifier <em>suspected</em> or deemed COVID-19 "probable" — even without a positive test. COVID-19 was listed as the <em>underlying</em> cause of death in 87–90% of cases (higher in 2020–2021); as a <em>contributing</em> cause in 10–13%. In 2022, COVID-19 was the sole cause in only 3.6% of death certificates.</div>
+        <a class="card-source" href="https://www.cdc.gov/nchs/nvss/vsrr/covid19/tech_notes.htm" target="_blank">→ CDC/NCHS Technical Notes on COVID-19 Deaths</a>
+      </div>
+      <div class="card">
+        <div class="card-label">MMWR · 2023</div>
+        <div class="card-title">In 2022: COVID-19 was underlying cause in 76% of deaths; contributing cause in 24%</div>
+        <div class="card-body">Among 244,986 COVID-19-associated deaths in 2022, COVID-19 was the underlying cause in 76% — meaning another condition (heart disease, cancer, etc.) was recorded as the primary cause in 24% of cases. The average death certificate listed 4.5 contributing causes. Heart disease and cancer were the most frequent alternative underlying causes.</div>
+        <a class="card-source" href="https://www.cdc.gov/mmwr/volumes/72/wr/mm7218a4.htm" target="_blank">→ MMWR: COVID-19 Mortality Update, United States 2022</a>
+      </div>
+      <div class="card">
+        <div class="card-label">Scientific American · AAMC</div>
+        <div class="card-title">Colorado "died with" vs. "died from" controversy: what actually happened</div>
+        <div class="card-body">Colorado's governor acknowledged that CDC guidelines required reporting any COVID-positive death to the CDC — even if COVID wasn't the direct cause — while the state separately did not count those as COVID-caused. This dual tracking created public confusion. Medical examiners note many home deaths go undiagnosed, making undercounting more likely than overcounting in most analyses.</div>
+        <a class="card-source" href="https://www.scientificamerican.com/article/how-covid-19-deaths-are-counted1/" target="_blank">→ Scientific American: How COVID-19 Deaths Are Counted</a>
+      </div>
+      <div class="card">
+        <div class="card-label">ScienceDirect · 2022</div>
+        <div class="card-title">Study: "died with" criticism didn't hold up — undercounting was the larger problem</div>
+        <div class="card-body">A peer-reviewed analysis of US state-level death counting methods found that, contrary to critics' claims, few states had definitions that systematically included unrelated COVID-19 deaths. States using death certificate reviews actually found <em>more</em> deaths than other methods. The study concluded undercounting — not overcounting — was the larger systematic problem.</div>
+        <a class="card-source" href="https://www.sciencedirect.com/science/article/pii/S1201971221010079" target="_blank">→ Methodology comparison study, ScienceDirect, 2022</a>
+      </div>
+    </div>
+
+    <h3 style="font-size:14px;font-weight:600;color:var(--text);margin:20px 0 14px;">Total Death Counts: US and Global</h3>
+    <div class="data-bars">
+      <div class="data-bar-row">
+        <div class="data-bar-label">US COVID deaths 2020</div>
+        <div class="data-bar-track"><div class="data-bar-fill red" style="width:32%"></div></div>
+        <div class="data-bar-val">~385K</div>
+      </div>
+      <div class="data-bar-row">
+        <div class="data-bar-label">US COVID deaths 2021</div>
+        <div class="data-bar-track"><div class="data-bar-fill red" style="width:40%"></div></div>
+        <div class="data-bar-val">~461K</div>
+      </div>
+      <div class="data-bar-row">
+        <div class="data-bar-label">US COVID deaths 2022</div>
+        <div class="data-bar-track"><div class="data-bar-fill amber" style="width:20%"></div></div>
+        <div class="data-bar-val">~245K</div>
+      </div>
+      <div class="data-bar-row">
+        <div class="data-bar-label">US total COVID deaths (cumulative, 2024)</div>
+        <div class="data-bar-track"><div class="data-bar-fill red" style="width:100%"></div></div>
+        <div class="data-bar-val">~1.17M</div>
+      </div>
+      <div class="data-bar-row">
+        <div class="data-bar-label">WHO global excess deaths 2020–2021</div>
+        <div class="data-bar-track"><div class="data-bar-fill red" style="width:100%"></div></div>
+        <div class="data-bar-val">~14.8M</div>
+      </div>
+    </div>
+    <div class="footnote">Sources: <a href="https://www.cdc.gov/mmwr/volumes/71/wr/mm7117e1.htm" target="_blank" style="color:var(--accent)">MMWR 2021 Provisional Mortality</a> · <a href="https://www.cdc.gov/mmwr/volumes/72/wr/mm7218a4.htm" target="_blank" style="color:var(--accent)">MMWR 2022 COVID Mortality Update</a> · <a href="https://www.medrxiv.org/content/10.1101/2024.03.05.24303783.full.pdf" target="_blank" style="color:var(--accent)">Cause-Specific Excess Mortality, US, 2024</a></div>
+
+    <h3 style="font-size:14px;font-weight:600;color:var(--text);margin:20px 0 14px;">Excess Mortality: The Broader Picture</h3>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-label">WHO Global Estimate · 2022</div>
+        <div class="card-title">WHO: 14.83 million excess deaths in 2020–2021 — 2.74× official COVID deaths</div>
+        <div class="card-body">The WHO estimated global excess deaths of 14.83 million in 2020–2021, compared to only 5.42 million officially reported COVID deaths during the same period. This suggests official COVID deaths significantly <em>undercounted</em> the pandemic's true toll — the gap likely represents undiagnosed COVID deaths, delayed care deaths, and overwhelmed healthcare system deaths.</div>
+        <a class="card-source" href="https://www.medrxiv.org/content/10.1101/2024.07.04.24309940.full.pdf" target="_blank">→ Hong Kong excess mortality comparison study, 2024 (citing WHO)</a>
+      </div>
+      <div class="card">
+        <div class="card-label">medrxiv · US Analysis · 2024</div>
+        <div class="card-title">Non-COVID excess deaths: cardiovascular, substance use, accidents also elevated</div>
+        <div class="card-body">A US cause-specific excess mortality analysis found that beyond official COVID deaths, an estimated 115,765 excess cardiovascular deaths occurred (2020–2024), along with 86,637 excess substance use/accident deaths and 41,326 excess diabetes deaths. These "indirect" deaths are attributed to healthcare disruptions, delayed care, and social consequences of the pandemic.</div>
+        <a class="card-source" href="https://www.medrxiv.org/content/10.1101/2024.03.05.24303783.full.pdf" target="_blank">→ Cause-Specific Excess Mortality in the US, 2024</a>
+      </div>
+    </div>
+
+    <div class="callout warn">
+      <strong>The "5% only COVID" controversy:</strong> CDC data showed COVID-19 was the <em>sole</em> listed cause of death in only ~5% of COVID death certificates. This was seized on (including by former President Trump) as evidence of massive overcounting. However, this figure is routinely misunderstood — in the vast majority of multi-cause deaths, COVID-19 was still listed as the <em>underlying cause</em> that set off the fatal chain of events (e.g. COVID → pneumonia → death). Most experts agree the low "sole cause" figure reflects comorbidity patterns in COVID deaths, not systematic miscounting. <a href="https://www.medicalnewstoday.com/articles/how-are-covid-19-deaths-counted-and-what-does-this-mean" target="_blank" style="color:var(--accent)">→ Medical News Today analysis</a>
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════════════
+       SECTION NEW-C: HOW DEADLY
+  ══════════════════════════════════════════ -->
+  <section class="section" id="how-deadly">
+    <div class="section-header">
+      <span class="section-num">06C</span>
+      <h2 class="section-title">How Deadly Was COVID-19? Was It Over-Hyped?</h2>
+      <span class="section-sub">IFR by age, comparisons, expert disagreement, and the evidence</span>
+    </div>
+
+    <div class="callout">
+      <strong>The honest answer is: it depends.</strong> COVID-19 was catastrophically deadly for the elderly and immunocompromised, moderately deadly for middle-aged adults, and carried very low mortality risk for healthy children and young adults. The debate about "over-hype" is largely a debate about whether policies were calibrated to this age gradient — and the evidence is mixed.
+    </div>
+
+    <h3 style="font-size:14px;font-weight:600;color:var(--text);margin:0 0 14px;">Infection Fatality Rate (IFR) — Pre-Vaccine Era, by Age</h3>
+    <div class="data-bars">
+      <div class="data-bar-row">
+        <div class="data-bar-label">Under 20 years old</div>
+        <div class="data-bar-track"><div class="data-bar-fill" style="width:1%"></div></div>
+        <div class="data-bar-val">&lt;0.002%</div>
+      </div>
+      <div class="data-bar-row">
+        <div class="data-bar-label">Ages 20–29</div>
+        <div class="data-bar-track"><div class="data-bar-fill" style="width:1%"></div></div>
+        <div class="data-bar-val">~0.01%</div>
+      </div>
+      <div class="data-bar-row">
+        <div class="data-bar-label">Ages 40–49</div>
+        <div class="data-bar-track"><div class="data-bar-fill amber" style="width:5%"></div></div>
+        <div class="data-bar-val">~0.1%</div>
+      </div>
+      <div class="data-bar-row">
+        <div class="data-bar-label">Ages 60–69</div>
+        <div class="data-bar-track"><div class="data-bar-fill amber" style="width:20%"></div></div>
+        <div class="data-bar-val">~1.0%</div>
+      </div>
+      <div class="data-bar-row">
+        <div class="data-bar-label">Ages 70–79</div>
+        <div class="data-bar-track"><div class="data-bar-fill red" style="width:45%"></div></div>
+        <div class="data-bar-val">~3–5%</div>
+      </div>
+      <div class="data-bar-row">
+        <div class="data-bar-label">Ages 80+ (high-income countries)</div>
+        <div class="data-bar-track"><div class="data-bar-fill red" style="width:100%"></div></div>
+        <div class="data-bar-val">~10–15%</div>
+      </div>
+    </div>
+    <div class="footnote">Sources: <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9613797/" target="_blank" style="color:var(--accent)">Ioannidis et al., NCBI/PMC — Age-stratified IFR, 2022</a> · <a href="https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(21)02867-1/fulltext" target="_blank" style="color:var(--accent)">The Lancet — IFR variation by age, time, geography, 2022</a> · Pre-vaccination era estimates; varied by country and healthcare capacity</div>
+
+    <h3 style="font-size:14px;font-weight:600;color:var(--text);margin:20px 0 14px;">Comparison to Other Causes of Death</h3>
+    <table class="compare-table">
+      <tr><th>Comparison</th><th>Key Facts</th><th>Source</th></tr>
+      <tr>
+        <td><strong>vs. Seasonal Flu</strong></td>
+        <td>COVID-19 killed 3–10× more Americans per year in 2020–2021 than flu typically does (~30,000–60,000/year). COVID became the 3rd leading cause of death in the US in 2020 and 2021. Flu does not commonly overwhelm ICU capacity the way COVID did during peak surges.</td>
+        <td><a href="https://www.cdc.gov/mmwr/volumes/71/wr/mm7117e1.htm" target="_blank">MMWR 2021 Provisional Mortality</a></td>
+      </tr>
+      <tr>
+        <td><strong>vs. 1918 Spanish Flu</strong></td>
+        <td>The 1918 flu killed ~675,000 Americans and 50–100 million globally with a much smaller global population. Its IFR (~2.5%) was higher than COVID's overall IFR but with a different age distribution (fatal in young adults, not just elderly). COVID's 1.17M US deaths in a population 3× larger than 1918 represents a massive toll.</td>
+        <td><a href="https://ourworldindata.org/mortality-risk-covid" target="_blank">Our World in Data — COVID mortality risk</a></td>
+      </tr>
+      <tr>
+        <td><strong>For children and young adults</strong></td>
+        <td>IFR in ages 0–29 was extremely low (&lt;0.01–0.002%). A meta-analysis by Ioannidis et al. (2022) found the IFR for ages 0–59 in high-income countries was 0.038% — and noted "excess death calculations show no excess deaths among children and adolescents during the pandemic in almost any country with reliable data."</td>
+        <td><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9613797/" target="_blank">Ioannidis et al., NCBI/PMC, 2022</a></td>
+      </tr>
+      <tr>
+        <td><strong>For elderly with comorbidities</strong></td>
+        <td>IFR for age 80+ in high-income countries exceeded 10–15%. COVID was devastating for nursing home populations: over 30% of early US COVID deaths occurred in long-term care facilities. This age gradient is the central fact most relevant to whether pandemic responses were proportionate.</td>
+        <td><a href="https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(21)02867-1/fulltext" target="_blank">The Lancet IFR analysis, 2022</a></td>
+      </tr>
+    </table>
+
+    <h3 style="font-size:14px;font-weight:600;color:var(--text);margin:20px 0 14px;">Was It Over-Hyped? Expert Views</h3>
+    <div class="accordion">
+      <button class="accordion-btn" onclick="toggleAccordion(this)">Arguments that COVID-19 danger was overstated for some populations <span class="chevron">▾</span></button>
+      <div class="accordion-body">
+        <ul style="padding-left:18px;color:var(--text-muted);font-size:13px;line-height:1.8;">
+          <li>Early IFR projections (e.g. Ferguson et al. 2020 modeled 0.9% IFR) were later revised downward as seroprevalence data showed far more people had been infected than initially known.</li>
+          <li>For people under 50 without comorbidities, the IFR was comparable to or below seasonal flu risk.</li>
+          <li>Prof. John Ioannidis (Stanford) and colleagues argued extensively that early estimates over-predicted fatality and that age-stratified risk justified more targeted rather than universal restrictions.</li>
+          <li>School closures were implemented despite very low child mortality risk — a decision now debated in terms of educational, developmental, and mental health costs vs. benefit for children.</li>
+          <li>Blanket lockdown policies did not sufficiently distinguish between age/risk groups.</li>
+        </ul>
+        <div class="footnote" style="margin-top:10px;">Source: <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9613797/" target="_blank" style="color:var(--accent)">Ioannidis et al., non-elderly IFR meta-analysis, 2022</a></div>
+      </div>
+    </div>
+    <div class="accordion">
+      <button class="accordion-btn" onclick="toggleAccordion(this)">Arguments that COVID-19 was genuinely catastrophic and responses were warranted <span class="chevron">▾</span></button>
+      <div class="accordion-body">
+        <ul style="padding-left:18px;color:var(--text-muted);font-size:13px;line-height:1.8;">
+          <li>1.17 million Americans died — more than all US deaths in WWI, WWII, the Korean War, and Vietnam combined.</li>
+          <li>Global excess mortality reached ~14.8 million in just 2020–2021 alone (WHO estimate), suggesting official COVID deaths were significant undercounts.</li>
+          <li>Without prior population immunity or vaccines, spread was rapid and hospital systems in high-population-density areas collapsed (New York March–April 2020; Italy; India 2021).</li>
+          <li>COVID was the #3 cause of death in the US in 2020 and 2021 — above stroke, Alzheimer's, diabetes, and flu combined.</li>
+          <li>Long COVID has affected millions even after mild acute illness, with ongoing disability that is not captured in death counts.</li>
+          <li>Excess cardiovascular deaths (115,765) and other indirect pandemic deaths show the system-level impact extended far beyond direct COVID fatalities.</li>
+        </ul>
+        <div class="footnote" style="margin-top:10px;">Sources: <a href="https://www.cdc.gov/mmwr/volumes/71/wr/mm7117e1.htm" target="_blank" style="color:var(--accent)">MMWR 2021 Mortality</a> · <a href="https://www.medrxiv.org/content/10.1101/2024.03.05.24303783.full.pdf" target="_blank" style="color:var(--accent)">US Excess Mortality by Cause, 2024</a></div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <strong>Summary:</strong> COVID-19 was not over-hyped for the elderly and high-risk — it was catastrophic for them. For healthy young people and children, the direct mortality risk was genuinely low, and some argue policies weren't sufficiently calibrated to this gradient. Both statements can be simultaneously true. The appropriate response remains scientifically and politically contested.
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════════════
+       SECTION NEW-D: HOSPITALS
+  ══════════════════════════════════════════ -->
+  <section class="section" id="hospitals">
+    <div class="section-header">
+      <span class="section-num">06D</span>
+      <h2 class="section-title">Hospital Strain & ICU Crisis</h2>
+      <span class="section-sub">Data on healthcare system capacity during COVID-19 surges</span>
+    </div>
+
+    <div class="callout">
+      <strong>What the data shows:</strong> Hospital and ICU overwhelm during COVID-19 was real, documented in federal HHS data, and caused measurable excess mortality. This was not evenly distributed — some regions and periods were catastrophically strained while others had excess capacity. The worst strain occurred in Winter 2020–2021.
+    </div>
+
+    <div class="card-grid">
+      <div class="data-bar-row" style="display:none"></div>
+    </div>
+
+    <h3 style="font-size:14px;font-weight:600;color:var(--text);margin:0 0 14px;">ICU Capacity Data: What Federal Numbers Show</h3>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-label">NCBI/PMC · Peer-Reviewed · 2022</div>
+        <div class="card-title">63% of US hospitals reached critical ICU capacity for at least 2 weeks (Sept 2020 – Feb 2021)</div>
+        <div class="card-body">A study of 1,753 US acute care hospitals using HHS Protect federal data found 63% reached critical ICU capacity (>90% beds occupied) for at least two consecutive weeks during the third COVID wave. Southern hospitals were 3.3× more likely to reach capacity than Northeastern ones. COVID patients were "crowding out" non-COVID ICU care.</div>
+        <a class="card-source" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8692088/" target="_blank">→ Figueroa et al., NCBI/PMC, 2022</a>
+      </div>
+      <div class="card">
+        <div class="card-label">NCBI/PMC · Hospital Alerts Study</div>
+        <div class="card-title">63% of 625 hospitals reported at least 1 alert for ED or ICU overcrowding (March 2020 – April 2021)</div>
+        <div class="card-body">An analysis of 625 hospitals across 29 states found 63% reported at least one overcrowding alert during the study period; 61% specifically reported ICU overcrowding. 12% reported ventilator shortages. Patients admitted during periods of high ED crowding had 5% higher odds of in-hospital death than similar patients at the same hospital in lower-crowding periods.</div>
+        <a class="card-source" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9257510/" target="_blank">→ ICU Overcrowding and Ventilator Shortages study, NCBI/PMC, 2022</a>
+      </div>
+      <div class="card">
+        <div class="card-label">MMWR / CDC · 2021</div>
+        <div class="card-title">When ICUs exceed 100% capacity: model estimated 80,000 additional excess deaths in following 2 weeks</div>
+        <div class="card-body">A CDC-backed analysis found a direct statistical relationship between ICU occupancy and excess deaths. If ICU bed use nationwide reached 75% capacity, an estimated 12,000 additional excess deaths were predicted within 2 weeks. When hospitals exceeded 100% ICU capacity, the model estimated 80,000 additional excess deaths. This directly links hospital strain to mortality beyond the direct COVID death toll.</div>
+        <a class="card-source" href="https://www.cdc.gov/mmwr/volumes/70/wr/mm7046a5.htm" target="_blank">→ MMWR: Hospital Strain and Excess Deaths, July 2020–July 2021</a>
+      </div>
+    </div>
+
+    <h3 style="font-size:14px;font-weight:600;color:var(--text);margin:20px 0 14px;">Crisis Conditions: What Hospitals Did</h3>
+    <div class="card-grid">
+      <div class="card">
+        <div class="card-label">ICU Surge Review · NCBI/PMC</div>
+        <div class="card-title">Hospitals canceled elective surgeries, repurposed spaces, deployed untrained staff</div>
+        <div class="card-body">A survey of 169 US hospitals found: 96.7% canceled or postponed elective surgeries; 63% dedicated specific ICUs to COVID patients; 51% repurposed step-down units as ICUs; 33% repurposed non-clinical spaces; 71% bought or borrowed additional ventilators. Non-ICU nurses and physicians were deployed into ICU roles in 85% of participating ICUs.</div>
+        <a class="card-source" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9612411/" target="_blank">→ Surging ICU During COVID-19, NCBI/PMC, 2022</a>
+      </div>
+      <div class="card">
+        <div class="card-label">Wikipedia · 2021 Hospital Crisis</div>
+        <div class="card-title">State-level collapse: Arizona 7% ICU beds available; Mississippi 92% occupied; Tennessee all ICU beds full</div>
+        <div class="card-body">At the peak of the Delta wave (summer 2021), Arizona had only 7% of ICU beds available. Mississippi's 92% ICU occupancy pushed the state to the "brink of failure." Tennessee's ICU beds were entirely full. Alabama declared a state of emergency. Oregon, Alabama, and other states implemented emergency crisis standards of care — shifting from individual patient optimization to population-level triage.</div>
+        <a class="card-source" href="https://en.wikipedia.org/wiki/2021_hospital_crisis_in_the_U.S._from_COVID-19" target="_blank">→ Wikipedia: 2021 US Hospital Crisis (citing state health dept. data)</a>
+      </div>
+      <div class="card">
+        <div class="card-label">WHO / Global Context</div>
+        <div class="card-title">Healthcare worker deaths: WHO estimated 80,000–180,000 HCW deaths Jan 2020 – May 2021</div>
+        <div class="card-body">The World Health Organization estimated between 80,000 and 180,000 healthcare professionals died from COVID-19 between January 2020 and May 2021. A French ICU study (October–December 2020) found 60% of healthcare workers in ICUs experienced anxiety, 36% depression, 28% PTSD, and 45% burnout — at rates far above pre-pandemic norms.</div>
+        <a class="card-source" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9612411/" target="_blank">→ Surging ICU review, NCBI/PMC, 2022 (citing WHO data)</a>
+      </div>
+    </div>
+
+    <div class="callout warn">
+      <strong>Regional variation and the "overwhelm" debate:</strong> Hospital strain was real but uneven. Urban centers in New York (Spring 2020), parts of the South and Southwest (Summer 2020, Summer/Fall 2021) experienced genuine collapse. Other regions, particularly rural areas, had excess capacity during some surges. Critics argue the framing of "overwhelmed hospitals" was applied nationally when it was more regionally concentrated — a legitimate critique of communication, though not of the underlying severity in affected areas.
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════════════════
+       SECTION 8: ESSAY WRITER
+  ══════════════════════════════════════════ -->
+  <section class="section" id="essay">
+    <div class="section-header">
+      <span class="section-num">08</span>
+      <h2 class="section-title">AI-Assisted Essay Writer</h2>
+      <span class="section-sub">Generate a sourced essay from your collected data</span>
+    </div>
+
+    <div id="essay-section">
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">Describe the essay you want — topic, angle, tone, length. The AI will write it using the data and sources collected in this hub.</p>
+      <textarea id="essay-prompt" placeholder="e.g. 'Write a 600-word analytical essay examining whether the evidence points more strongly to lab leak or natural origin, presenting both sides fairly and citing the key scientific and intelligence sources collected here. Conclude with what questions remain unanswered.'"></textarea>
+      <div id="essay-controls">
+        <button class="btn" id="essay-btn" onclick="generateEssay()">Generate Essay <span class="spinner" id="essay-spinner"></span></button>
+        <button class="btn secondary" onclick="clearEssay()">Clear</button>
+        <button class="btn secondary" onclick="copyEssay()">Copy Text</button>
+      </div>
+      <div id="essay-output" style="display:none;"></div>
+    </div>
+  </section>
+
+</div><!-- /page-wrap -->
+
+<script>
+  // ── NAV ACTIVE STATE ──
+  const sections = document.querySelectorAll('.section');
+  const navLinks = document.querySelectorAll('.nav-link');
+
+  function updateActiveNav() {
+    let current = '';
+    sections.forEach(s => {
+      if (window.scrollY >= s.offsetTop - 80) current = s.id;
+    });
+    navLinks.forEach(l => {
+      l.classList.toggle('active', l.getAttribute('href') === '#' + current);
+    });
+  }
+  window.addEventListener('scroll', updateActiveNav, { passive: true });
+
+  // ── ACCORDION ──
+  function toggleAccordion(btn) {
+    btn.classList.toggle('open');
+    const body = btn.nextElementSibling;
+    body.classList.toggle('open');
+  }
+
+  // ── SEARCH ──
+  function searchPage(q) {
+    const terms = q.toLowerCase().trim().split(/\s+/).filter(Boolean);
+    if (!terms.length) {
+      document.querySelectorAll('.card, .tl-item, .accordion').forEach(el => el.style.opacity = '');
+      return;
+    }
+    document.querySelectorAll('.card, .tl-item, .accordion').forEach(el => {
+      const text = el.innerText.toLowerCase();
+      const match = terms.every(t => text.includes(t));
+      el.style.opacity = match ? '1' : '0.2';
+    });
+  }
+
+  // ── ESSAY WRITER ──
+  const DATA_CONTEXT = `
+You are an expert research writer helping a person synthesize their COVID-19 research archive. You have access to the following collected data and sources:
+
+ORIGINS:
+- Andersen et al., Nature Medicine 2020 (Proximal Origin): argues natural origin based on receptor binding domain and furin cleavage site
+- Worobey et al., Science 2022: Huanan market as early epicenter, supports zoonotic origin
+- WHO-China joint study (March 2021): rated lab leak "extremely unlikely" — later acknowledged as insufficient by WHO Director Tedros
+- FBI (moderate confidence, 2023): lab incident most likely origin
+- Dept. of Energy (low confidence, 2023): lab incident most likely
+- CIA (low confidence, Jan 2025): joined FBI/DOE in favoring lab leak
+- National Intelligence Council + 4 agencies: lean natural origin
+- House Select Subcommittee Final Report (May 2024): concluded SARS-CoV-2 did not originate naturally; likely lab leak
+- Former CDC Director Robert Redfield testimony: biology of virus points to lab origin
+- White House report (June 2025): lab-related incident involving gain-of-function "most likely origin"
+- German BND 2020 report (unpublished, leaked 2025): estimated 80-90% probability of lab leak
+- Key gap: China has not provided raw Dec 2019 case data, or access to WIV database (taken offline Sept 2019)
+
+GAIN-OF-FUNCTION:
+- NIAID (under Fauci) funded EcoHealth Alliance → Wuhan Institute of Virology 2014–2019
+- Obama moratorium on GoF research Oct 2014; NIH continued funding WIV work during moratorium
+- July 2016: NIH internal review found "possible GoF concerns" in EcoHealth/WIV experiment
+- Jan 2018: NIH lifted moratorium
+- Fauci May 2021 testimony: "NIH has not ever and does not now fund gain-of-function research in WIV"
+- NIH Oct 2021 letter to Congress: acknowledged enhanced bat coronavirus results from WIV experiments
+- The Intercept Sept 2021: FOIA documents show chimeric viruses replicated faster in humanized mice
+- Dr. Tabak (NIH) 2024 hearing: admitted NIH funded GoF at WIV through EcoHealth; said he would not support same grant today
+- Core dispute: definition of "gain-of-function" — NIH uses narrower current definition; critics cite broader 2014 Obama-era definition
+- DARPA rejected EcoHealth's 2018 DEFUSE proposal (bat inoculation with chimeric coronaviruses) over biosafety concerns
+
+VACCINES:
+- Pfizer RCT efficacy: 95% (original strain); Moderna: 94%; AstraZeneca: 67%; J&J: 67%
+- Real-world effectiveness vs Delta: Pfizer 88%, AstraZeneca 67%
+- Waning immunity led to booster recommendations; initial 8-month interval shortened
+- Myocarditis: FDA required updated warning labels (2024); rates in young males ~13-15/100,000 doses per VSD
+- COVID-19 infection causes ~150 myocarditis cases per 100,000 vs ~2-15 from vaccines
+- Long-term cardiac studies ongoing (FDA-required)
+
+MASKS:
+- Cochrane Review 2023 (78 RCTs): masks "may make little to no difference" in community spread
+- RCT meta-analysis 2023: surgical masks showed little difference; N95s showed significant protection
+- Lab aerosol studies: masks physically block particles (N95: 95%+)
+- Bangladesh cluster RCT (Science, 2022): surgical mask distribution reduced COVID-like illness ~11%
+- Key tension: lab filtration data vs. real-world RCT results
+
+VACCINE HARMS:
+- VAERS through June 2023: 1.57M adverse event reports, 35,487 death reports, 27,229 myocarditis/pericarditis reports, 20,184 heart attack reports — VAERS reports ≠ confirmed causal deaths; anyone can file; designed for signal detection only
+- Confirmed causal adverse events: Myocarditis/pericarditis (mRNA vaccines, 2–15/100K doses in males 12–29); VITT/blood clots (AstraZeneca/J&J adenoviral vaccines, ~1/100K–150K doses, 18 EU deaths per 34M doses); Anaphylaxis (all vaccines, ~2–5/million); GBS (J&J primarily)
+- EMA April 7, 2021: confirmed VITT as "very rare" adverse event of AstraZeneca; 222 cerebral venous thrombosis cases out of 34 million doses; EMA concluded benefits outweigh risks
+- AstraZeneca withdrawn from global markets May 2024 (cited commercial reasons, not new safety data)
+- MMWR Oregon study (April 2024): No confirmed vaccine-attributed sudden cardiac deaths in previously healthy young people aged 16–30 (June 2021–Dec 2022)
+- National Academies 2024: FDA clinical trial data showed no sudden death signal for any COVID-19 vaccine
+- Australian population study (4.49M people): no association between vaccination and out-of-hospital cardiac arrest within 30 days
+- COVID-19 infection itself causes ~150 myocarditis cases per 100,000 vs ~2–15 from mRNA vaccines
+- VITT strongly associated with adenoviral vectors: AstraZeneca 95%, J&J 4%, mRNA vaccines <0.5% of cases
+
+DEATH COUNTS:
+- CDC uses ICD-10 code U07.1: COVID counted when "probable" even without lab confirmation
+- 2022: COVID was underlying cause in 76% of deaths; contributing cause in 24%; sole cause in only 3.6%
+- US deaths: ~385K (2020), ~461K (2021), ~245K (2022), ~1.17M cumulative by early 2024
+- WHO global excess deaths: 14.83 million in 2020–2021 alone (2.74× official COVID deaths) — suggests massive undercounting globally
+- ScienceDirect 2022 study: peer review found undercounting was the larger problem; "died with" criticism didn't hold up systematically
+- Non-COVID excess deaths: 115,765 excess cardiovascular deaths, 86,637 substance/accident deaths, 41,326 diabetes deaths (US 2020–2024)
+- "Only 5% sole cause" controversy: misunderstood; most multi-cause deaths still listed COVID as underlying cause triggering fatal chain
+
+HOW DEADLY:
+- IFR by age (pre-vaccine): <0.002% under 20; ~0.01% ages 20–29; ~0.1% ages 40–49; ~1% ages 60–69; ~3–5% ages 70–79; ~10–15% ages 80+ (high-income countries)
+- Ioannidis et al. 2022 (NCBI): IFR for ages 0–59 in high-income countries was 0.038%; no excess deaths in children in almost any country with reliable data
+- The Lancet 2022: global median all-age IFR was 0.466% (April 2020) declining to 0.314% (Jan 2021); age was the strongest predictor
+- COVID was 3rd leading cause of US death in 2020 and 2021 (after heart disease and cancer)
+- Arguments it was overstated: early IFR projections too high; low-risk for under-50; school closures debated; policies not sufficiently age-stratified
+- Arguments it was not overstated: 1.17M US deaths; 14.8M global excess deaths; overwhelmed hospitals caused additional mortality; long COVID affects millions; comparison to flu: COVID killed 3–10× more
+
+HOSPITAL CRISIS:
+- 63% of 1,753 US hospitals reached critical ICU capacity (>90% beds) for ≥2 weeks, Sept 2020–Feb 2021 (HHS Protect federal data)
+- 63% of 625 hospitals reported ED or ICU overcrowding alerts March 2020–April 2021; 12% had ventilator shortages
+- CDC model: hospitals exceeding 100% ICU capacity predicted 80,000 additional excess deaths in following 2 weeks
+- Arizona: 7% ICU beds available at peak; Mississippi: 92% occupied; Tennessee: all ICU beds full; Alabama declared state of emergency (all Delta wave 2021)
+- Hospitals canceled 96.7% of elective surgeries; 71% borrowed/bought additional ventilators; non-ICU nurses deployed to ICUs in 85% of surveyed hospitals
+- WHO estimated 80,000–180,000 healthcare workers died Jan 2020–May 2021; French ICU study: 60% anxiety, 36% depression, 45% burnout among ICU staff
+- Hospital overwhelm was real but geographically uneven — worst in urban areas and specific surges; some rural regions had excess capacity
+
+CHANGED FACTS:
+- Feb-March 2020: public told not to wear masks → April 2020: CDC reversed to recommend masks
+- 6-foot distancing: Fauci admitted (Jan 2024) this was "not based on scientific studies"
+- Lab leak: dismissed as conspiracy 2020 → officially plausible by 2021–2025
+- Vaccine transmission prevention: marketed as preventing transmission → shifted to "reduces" transmission → Pfizer admitted never tested for this before authorization
+- Myocarditis: called "extremely rare" → FDA required updated warning labels with incidence data
+
+Write in a clear, analytical, well-organized style. Be fair to all sides. Cite specific sources by name and link when possible. Do not invent data.
+`;
+
+  async function generateEssay() {
+    const prompt = document.getElementById('essay-prompt').value.trim();
+    if (!prompt) { alert('Please describe the essay you want.'); return; }
+
+    const btn = document.getElementById('essay-btn');
+    const spinner = document.getElementById('essay-spinner');
+    const output = document.getElementById('essay-output');
+
+    btn.disabled = true;
+    spinner.style.display = 'inline-block';
+    output.style.display = 'block';
+    output.innerHTML = '<em style="color:var(--text-dim)">Generating essay…</em>';
+
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 1000,
+          system: DATA_CONTEXT,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+      const data = await res.json();
+      const text = data.content?.map(b => b.text || '').join('') || 'No response.';
+      // Format paragraphs
+      output.innerHTML = text.split('\n\n').map(p =>
+        p.trim() ? `<p style="margin-bottom:1em">${p.replace(/\n/g,'<br>')}</p>` : ''
+      ).join('');
+    } catch (e) {
+      output.innerHTML = `<span style="color:var(--accent4)">Error: ${e.message}</span>`;
+    } finally {
+      btn.disabled = false;
+      spinner.style.display = 'none';
+    }
+  }
+
+  function clearEssay() {
+    document.getElementById('essay-output').style.display = 'none';
+    document.getElementById('essay-output').innerHTML = '';
+    document.getElementById('essay-prompt').value = '';
+  }
+
+  function copyEssay() {
+    const text = document.getElementById('essay-output').innerText;
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(() => {
+      alert('Essay copied to clipboard.');
+    });
+  }
+</script>
+</body>
+</html>
