@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COVID-19 Charts & Timeline</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@300;400;600&family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap');
+
+:root {
+  --bg: #0e1117;
+  --surface: #161b27;
+  --surface2: #1d2433;
+  --border: #2a3347;
+  --blue: #4a9eff;
+  --amber: #f59e0b;
+  --green: #10b981;
+  --red: #f43f5e;
+  --purple: #a78bfa;
+  --teal: #2dd4bf;
+  --text: #e2e8f0;
+  --muted: #8892a4;
+  --dim: #4a5568;
+  --serif: 'IBM Plex Serif', Georgia, serif;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'Inter', system-ui, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 14px; }
+
+/* NAV */
+#top-nav {
+  position: fixed; top:0; left:0; right:0; z-index:200;
+  background: rgba(14,17,23,0.96); backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; padding: 0 20px; height: 50px; gap: 4px;
+}
+.nav-brand { font-family: var(--mono); font-size: 11px; color: var(--blue); letter-spacing: .1em; text-transform: uppercase; white-space: nowrap; margin-right: 16px; }
+.nav-links { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; }
+.nav-links::-webkit-scrollbar { display: none; }
+.nav-link { font-size: 11px; font-weight: 500; color: var(--muted); text-decoration: none; padding: 4px 9px; border-radius: 4px; white-space: nowrap; transition: all .15s; text-transform: uppercase; letter-spacing: .03em; }
+.nav-link:hover { color: var(--text); background: var(--surface2); }
+.back-link { margin-left: auto; font-size: 11px; color: var(--blue); text-decoration: none; font-family: var(--mono); white-space: nowrap; }
+
+.page { max-width: 1140px; margin: 0 auto; padding: 70px 20px 80px; }
+
+/* HERO */
+.hero { padding: 48px 0 36px; border-bottom: 1px solid var(--border); margin-bottom: 52px; }
+.hero-eyebrow { font-family: var(--mono); font-size: 10px; color: var(--blue); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 14px; }
+.hero-title { font-family: var(--serif); font-size: clamp(26px,4vw,42px); font-weight: 600; color: #fff; line-height: 1.15; margin-bottom: 14px; }
+.hero-title span { color: var(--amber); }
+.hero-desc { color: var(--muted); font-size: 14px; line-height: 1.8; max-width: 580px; }
+
+/* SECTION */
+.section { margin-bottom: 64px; scroll-margin-top: 62px; }
+.section-hdr { display: flex; align-items: baseline; gap: 12px; margin-bottom: 24px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+.section-num { font-family: var(--mono); font-size: 10px; color: var(--blue); letter-spacing: .1em; }
+.section-title { font-family: var(--serif); font-size: 22px; font-weight: 600; color: #fff; }
+.section-sub { font-size: 12px; color: var(--muted); }
+
+/* CHARTS */
+.chart-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(460px, 1fr)); gap: 20px; margin-bottom: 20px; }
+.chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 22px 22px 18px; }
+.chart-card:hover { border-color: var(--blue); }
+.chart-label { font-family: var(--mono); font-size: 10px; color: var(--dim); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 6px; }
+.chart-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; line-height: 1.4; }
+.chart-sub { font-size: 11px; color: var(--muted); margin-bottom: 14px; line-height: 1.5; }
+.chart-wrap { position: relative; height: 220px; }
+.chart-wrap.tall { height: 280px; }
+.chart-wrap.xtall { height: 340px; }
+.chart-note { font-family: var(--mono); font-size: 10px; color: var(--dim); margin-top: 10px; line-height: 1.5; }
+.chart-note a { color: var(--blue); text-decoration: none; }
+.chart-note a:hover { text-decoration: underline; }
+.chart-full { grid-column: 1 / -1; }
+
+/* CALLOUT */
+.callout { background: var(--surface); border-left: 3px solid var(--blue); border-radius: 0 6px 6px 0; padding: 12px 16px; margin: 16px 0; font-size: 12px; color: var(--muted); line-height: 1.7; }
+.callout.warn { border-color: var(--amber); }
+.callout.danger { border-color: var(--red); }
+.callout strong { color: var(--text); }
+
+/* TIMELINE */
+#pandemic-timeline { position: relative; }
+.tl-controls { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 28px; }
+.tl-filter {
+  font-size: 11px; font-family: var(--mono); padding: 5px 12px; border-radius: 20px;
+  border: 1px solid var(--border); background: var(--surface); color: var(--muted);
+  cursor: pointer; transition: all .15s; text-transform: uppercase; letter-spacing: .05em;
+}
+.tl-filter:hover, .tl-filter.active { color: #fff; border-color: currentColor; }
+.tl-filter.f-all { color: var(--text); }
+.tl-filter.f-virus { color: var(--red); }
+.tl-filter.f-policy { color: var(--amber); }
+.tl-filter.f-vaccine { color: var(--green); }
+.tl-filter.f-media { color: var(--purple); }
+.tl-filter.f-shift { color: var(--teal); }
+
+.tl-year-label {
+  font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--blue);
+  letter-spacing: .08em; text-transform: uppercase;
+  padding: 8px 0 16px; margin-top: 8px;
+  border-top: 1px solid var(--border);
+}
+.tl-entries { display: flex; flex-direction: column; gap: 0; }
+.tl-entry {
+  display: grid; grid-template-columns: 140px 20px 1fr; gap: 0 12px; align-items: start;
+  padding: 0 0 22px; position: relative;
+}
+.tl-entry .tl-date-col { text-align: right; padding-top: 3px; }
+.tl-entry .tl-date-str { font-family: var(--mono); font-size: 10px; color: var(--muted); line-height: 1.4; }
+.tl-entry .tl-line-col { display: flex; flex-direction: column; align-items: center; padding-top: 3px; }
+.tl-entry .tl-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.tl-entry .tl-vline { flex: 1; width: 1px; background: var(--border); margin-top: 4px; min-height: 20px; }
+.tl-entry .tl-body { padding-top: 1px; }
+.tl-entry .tl-tag { font-family: var(--mono); font-size: 9px; text-transform: uppercase; letter-spacing: .08em; font-weight: 500; margin-bottom: 4px; }
+.tl-entry .tl-text { font-size: 12.5px; color: var(--muted); line-height: 1.65; }
+.tl-entry .tl-text strong { color: var(--text); }
+.tl-entry .tl-src { font-family: var(--mono); font-size: 9px; color: var(--blue); text-decoration: none; display: inline-block; margin-top: 4px; }
+.tl-entry .tl-src:hover { text-decoration: underline; }
+
+/* Category colors */
+.cat-virus .tl-dot { background: var(--red); } .cat-virus .tl-tag { color: var(--red); }
+.cat-policy .tl-dot { background: var(--amber); } .cat-policy .tl-tag { color: var(--amber); }
+.cat-vaccine .tl-dot { background: var(--green); } .cat-vaccine .tl-tag { color: var(--green); }
+.cat-media .tl-dot { background: var(--purple); } .cat-media .tl-tag { color: var(--purple); }
+.cat-shift .tl-dot { background: var(--teal); } .cat-shift .tl-tag { color: var(--teal); }
+
+.tl-entry.hidden { display: none; }
+
+/* Legend */
+.legend { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 28px; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--muted); }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+@media (max-width: 600px) {
+  .chart-grid { grid-template-columns: 1fr; }
+  .tl-entry { grid-template-columns: 90px 16px 1fr; }
+}
+</style>
+</head>
+<body>
+
+<nav id="top-nav">
+  <div class="nav-brand">COVID-19 Charts</div>
+  <div class="nav-links">
+    <a class="nav-link" href="#charts-deaths">Deaths</a>
+    <a class="nav-link" href="#charts-ifr">Fatality Rates</a>
+    <a class="nav-link" href="#charts-vaccines">Vaccines</a>
+    <a class="nav-link" href="#charts-harms">Harms</a>
+    <a class="nav-link" href="#charts-masks">Masks</a>
+    <a class="nav-link" href="#charts-hospitals">Hospitals</a>
+    <a class="nav-link" href="#pandemic-timeline">Full Timeline</a>
+  </div>
+  <a class="back-link" href="covid19-research-hub.html">← Research Hub</a>
+</nav>
+
+<div class="page">
+
+  <div class="hero">
+    <p class="hero-eyebrow">Visual Data · COVID-19 Research Hub</p>
+    <h1 class="hero-title">COVID-19 <span>Charts</span> & Timeline</h1>
+    <p class="hero-desc">All charts are built from peer-reviewed studies, CDC/NCHS mortality data, WHO reports, and FDA/EMA safety reviews. Sources are cited beneath each chart. The timeline covers November 2019 through 2025 — filterable by category.</p>
+  </div>
+
+
+  <!-- ═══════════════════════════════════
+       DEATH COUNTS
+  ═══════════════════════════════════ -->
+  <section class="section" id="charts-deaths">
+    <div class="section-hdr">
+      <span class="section-num">01</span>
+      <h2 class="section-title">COVID-19 Deaths</h2>
+      <span class="section-sub">US & Global counts, excess mortality, and data problems</span>
+    </div>
+    <div class="chart-grid">
+
+      <div class="chart-card">
+        <div class="chart-label">CDC / NCHS · Annual</div>
+        <div class="chart-title">US COVID-19 Deaths by Year</div>
+        <div class="chart-sub">Official death certificate counts — COVID-19 as underlying or contributing cause (ICD-10 U07.1)</div>
+        <div class="chart-wrap"><canvas id="c-us-deaths-year"></canvas></div>
+        <div class="chart-note">Sources: <a href="https://www.cdc.gov/mmwr/volumes/71/wr/mm7117e1.htm" target="_blank">MMWR 2021</a> · <a href="https://www.cdc.gov/mmwr/volumes/72/wr/mm7218a4.htm" target="_blank">MMWR 2022</a> · <a href="https://www.cdc.gov/nchs/nvss/vsrr/covid19/tech_notes.htm" target="_blank">CDC/NCHS</a></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-label">WHO Global Estimate · 2022</div>
+        <div class="chart-title">Official COVID Deaths vs. Estimated Excess Deaths (Global, 2020–2021)</div>
+        <div class="chart-sub">WHO estimated global excess deaths were 2.74× higher than officially reported COVID deaths — suggesting massive global undercounting</div>
+        <div class="chart-wrap"><canvas id="c-excess-global"></canvas></div>
+        <div class="chart-note">Source: <a href="https://www.medrxiv.org/content/10.1101/2024.07.04.24309940.full.pdf" target="_blank">Hong Kong excess mortality study citing WHO, 2024</a></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-label">MMWR 2022 · Death Certificate Data</div>
+        <div class="chart-title">COVID-19 Role in Deaths: Underlying vs. Contributing Cause (2022)</div>
+        <div class="chart-sub">In 2022, COVID was the underlying cause (trigger) in 76% of cases — listed as contributing (additional) cause in 24%. Only 3.6% listed COVID as the sole cause.</div>
+        <div class="chart-wrap"><canvas id="c-cause-breakdown"></canvas></div>
+        <div class="chart-note">Source: <a href="https://www.cdc.gov/mmwr/volumes/72/wr/mm7218a4.htm" target="_blank">MMWR, COVID-19 Mortality Update 2022</a></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-label">US Excess Mortality Analysis · 2024</div>
+        <div class="chart-title">US Non-COVID Excess Deaths by Category (2020–2024)</div>
+        <div class="chart-sub">Beyond direct COVID deaths, an estimated 280,000+ additional Americans died of indirect pandemic causes — delayed care, overwhelmed hospitals, and social disruption</div>
+        <div class="chart-wrap"><canvas id="c-indirect-deaths"></canvas></div>
+        <div class="chart-note">Source: <a href="https://www.medrxiv.org/content/10.1101/2024.03.05.24303783.full.pdf" target="_blank">Cause-Specific Excess Mortality, US, 2024</a></div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════
+       IFR / HOW DEADLY
+  ═══════════════════════════════════ -->
+  <section class="section" id="charts-ifr">
+    <div class="section-hdr">
+      <span class="section-num">02</span>
+      <h2 class="section-title">How Deadly Was COVID-19?</h2>
+      <span class="section-sub">Infection Fatality Rate (IFR) by age, global IFR distribution, comparisons</span>
+    </div>
+    <div class="chart-grid">
+
+      <div class="chart-card">
+        <div class="chart-label">Ioannidis et al. 2022 · The Lancet 2022</div>
+        <div class="chart-title">Infection Fatality Rate (IFR) by Age Group — Pre-Vaccine Era</div>
+        <div class="chart-sub">IFR rises exponentially with age. Risk for under-30s was comparable to seasonal flu. Risk for 80+ exceeded 10% in high-income countries.</div>
+        <div class="chart-wrap tall"><canvas id="c-ifr-age"></canvas></div>
+        <div class="chart-note">Sources: <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9613797/" target="_blank">Ioannidis et al., NCBI 2022</a> · <a href="https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(21)02867-1/fulltext" target="_blank">Lancet IFR Analysis 2022</a></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-label">Context Comparison</div>
+        <div class="chart-title">COVID-19 vs. Other Mortality Events — US Annual Deaths</div>
+        <div class="chart-sub">COVID-19 became the 3rd leading cause of US death in 2020 and 2021 — above stroke, Alzheimer's, diabetes, and flu</div>
+        <div class="chart-wrap tall"><canvas id="c-death-compare"></canvas></div>
+        <div class="chart-note">Sources: <a href="https://www.cdc.gov/mmwr/volumes/71/wr/mm7117e1.htm" target="_blank">MMWR 2021</a> · CDC leading causes of death statistics</div>
+      </div>
+
+      <div class="chart-card chart-full">
+        <div class="chart-label">Pre-Vaccine Era · Multiple Studies</div>
+        <div class="chart-title">IFR Estimates Across Studies — Comparison (Overall Population, High-Income Countries)</div>
+        <div class="chart-sub">Multiple independent research groups produced similar IFR estimates. Early 2020 estimates (high) were revised downward as seroprevalence studies showed more infections than confirmed.</div>
+        <div class="chart-wrap"><canvas id="c-ifr-compare"></canvas></div>
+        <div class="chart-note">Sources: <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9613797/" target="_blank">Ioannidis 2022</a> · <a href="https://www.thelancet.com/journals/lancet/article/PIIS0140-6736(21)02867-1/fulltext" target="_blank">Lancet 2022</a> · <a href="https://www.sciencedirect.com/science/article/pii/S2468042725001071" target="_blank">NYC seroprevalence study</a> · Wilson 2022 (CDC serology surveys)</div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════
+       VACCINES
+  ═══════════════════════════════════ -->
+  <section class="section" id="charts-vaccines">
+    <div class="section-hdr">
+      <span class="section-num">03</span>
+      <h2 class="section-title">Vaccine Efficacy Data</h2>
+      <span class="section-sub">Clinical trial results, real-world effectiveness, waning immunity</span>
+    </div>
+    <div class="chart-grid">
+
+      <div class="chart-card">
+        <div class="chart-label">Phase 3 RCT Results · 2020–2021</div>
+        <div class="chart-title">COVID-19 Vaccine Efficacy — Original Strain Clinical Trials</div>
+        <div class="chart-sub">Efficacy against symptomatic infection in randomized controlled trials. Pfizer and Moderna led; other platforms showed lower but significant efficacy.</div>
+        <div class="chart-wrap tall"><canvas id="c-vax-efficacy"></canvas></div>
+        <div class="chart-note">Source: <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8951318/" target="_blank">COVID-19 VE Review, NCBI 2022</a></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-label">Real-World Effectiveness · vs. Variants</div>
+        <div class="chart-title">Pfizer (BNT162b2) Effectiveness by Variant — Symptomatic Infection</div>
+        <div class="chart-sub">Real-world effectiveness dropped significantly against each new variant, particularly Omicron. Protection against severe disease remained higher than against infection.</div>
+        <div class="chart-wrap tall"><canvas id="c-variant-efficacy"></canvas></div>
+        <div class="chart-note">Source: <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC8708265/" target="_blank">WHO rapid review, 2021</a> · Multiple VE studies</div>
+      </div>
+
+      <div class="chart-card chart-full">
+        <div class="chart-label">Booster Uptake Context</div>
+        <div class="chart-title">US COVID-19 Booster Authorization Timeline — Expanding Eligibility 2021–2024</div>
+        <div class="chart-sub">Number of US population groups newly eligible for each booster authorization. Each expansion broadened who could get a booster dose.</div>
+        <div class="chart-wrap"><canvas id="c-booster-timeline"></canvas></div>
+        <div class="chart-note">Source: <a href="https://www.immunize.org/vaccines/vaccine-timeline/" target="_blank">Immunize.org vaccine timeline</a> · <a href="https://www.cdc.gov/museum/timeline/covid19.html" target="_blank">CDC Museum COVID-19 Timeline</a></div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════
+       VACCINE HARMS
+  ═══════════════════════════════════ -->
+  <section class="section" id="charts-harms">
+    <div class="section-hdr">
+      <span class="section-num">04</span>
+      <h2 class="section-title">Vaccine Adverse Events</h2>
+      <span class="section-sub">Confirmed harms, rates, and comparison to COVID infection risk</span>
+    </div>
+    <div class="callout warn">
+      <strong>VAERS note:</strong> VAERS death and adverse event <em>reports</em> are not confirmed causal deaths. They are passive reports filed by anyone and are used for signal detection only. Active surveillance (Vaccine Safety Datalink, clinical studies) provides causal evidence.
+    </div>
+    <div class="chart-grid">
+
+      <div class="chart-card">
+        <div class="chart-label">VAERS Through June 2023 · Signal Data</div>
+        <div class="chart-title">VAERS COVID-19 Vaccine Adverse Event Reports by Type</div>
+        <div class="chart-sub">Total reports filed in VAERS. These are not confirmed as caused by vaccines — they are reports of events that occurred after vaccination and require further investigation.</div>
+        <div class="chart-wrap"><canvas id="c-vaers"></canvas></div>
+        <div class="chart-note">Source: <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC12450757/" target="_blank">Autopsy findings in fatal vaccine-induced myocarditis, NCBI 2023</a></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-label">FDA / VSD / Israel Data · Confirmed Signal</div>
+        <div class="chart-title">Myocarditis Rate per 100,000 Doses — mRNA Vaccines in Males by Age</div>
+        <div class="chart-sub">Rates from the Vaccine Safety Datalink (active surveillance) — more accurate than VAERS passive reporting. Risk highest in males 16–29 after dose 2.</div>
+        <div class="chart-wrap"><canvas id="c-myocarditis"></canvas></div>
+        <div class="chart-note">Source: <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9880674/" target="_blank">Myocarditis in young males, NCBI 2023</a> · <a href="https://www.cdc.gov/mmwr/volumes/73/wr/mm7314a5.htm" target="_blank">MMWR Oregon study 2024</a></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-label">Risk Comparison · COVID vs. Vaccine</div>
+        <div class="chart-title">Myocarditis: COVID Infection vs. Vaccination (per 100,000)</div>
+        <div class="chart-sub">COVID-19 infection causes far more myocarditis than the vaccines — approximately 150 cases per 100,000 vs. 2–15 from mRNA vaccination. Context essential for risk evaluation.</div>
+        <div class="chart-wrap"><canvas id="c-myo-compare"></canvas></div>
+        <div class="chart-note">Source: <a href="https://www.nationalacademies.org/read/27746/chapter/9" target="_blank">National Academies evidence review, 2024</a> · CDC Boehmer et al. 2021</div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-label">Confirmed Causal Adverse Events · EMA / FDA</div>
+        <div class="chart-title">Serious Confirmed Vaccine Adverse Events — Estimated Rates per Million Doses</div>
+        <div class="chart-sub">Rates for adverse events where a causal relationship has been officially confirmed. All are rare; rates vary significantly by vaccine type.</div>
+        <div class="chart-wrap"><canvas id="c-confirmed-aes"></canvas></div>
+        <div class="chart-note">Sources: <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10655150/" target="_blank">VITT review, NCBI 2023</a> · <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10363417/" target="_blank">WHO AEFI surveillance 2023</a> · <a href="https://www.fda.gov/vaccines-blood-biologics/safety-availability-biologics/fda-approves-required-updated-warning-labeling-mrna-covid-19-vaccines-regarding-myocarditis-and" target="_blank">FDA 2024</a></div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════
+       MASKS
+  ═══════════════════════════════════ -->
+  <section class="section" id="charts-masks">
+    <div class="section-hdr">
+      <span class="section-num">05</span>
+      <h2 class="section-title">Mask Efficacy Data</h2>
+      <span class="section-sub">RCT evidence vs. observational studies vs. lab data</span>
+    </div>
+    <div class="chart-grid">
+
+      <div class="chart-card">
+        <div class="chart-label">Cochrane Review 2023 · 78 RCTs</div>
+        <div class="chart-title">Evidence Quality Rating by Mask Study Type</div>
+        <div class="chart-sub">The Cochrane Review methodology accepts only RCTs. Observational studies have higher infection risk but are excluded from its conclusions due to high confounding.</div>
+        <div class="chart-wrap"><canvas id="c-mask-evidence"></canvas></div>
+        <div class="chart-note">Sources: <a href="https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD006207.pub6/full" target="_blank">Jefferson et al., Cochrane 2023</a> · <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10446908/" target="_blank">Systematic review, NCBI 2023</a></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-label">RCT Meta-Analysis · NCBI 2023</div>
+        <div class="chart-title">Mask Type Effectiveness in RCTs (Odds Ratio — lower = more protective)</div>
+        <div class="chart-sub">N95 respirators showed statistically significant protection (OR 0.03). Surgical masks showed little difference from controls in RCTs. Observational data tells a different story.</div>
+        <div class="chart-wrap"><canvas id="c-mask-type"></canvas></div>
+        <div class="chart-note">Source: <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10509348/" target="_blank">RCT meta-analysis, NCBI 2023</a></div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════
+       HOSPITALS
+  ═══════════════════════════════════ -->
+  <section class="section" id="charts-hospitals">
+    <div class="section-hdr">
+      <span class="section-num">06</span>
+      <h2 class="section-title">Hospital & ICU Strain</h2>
+      <span class="section-sub">Capacity data from HHS Protect federal database and peer-reviewed studies</span>
+    </div>
+    <div class="chart-grid">
+
+      <div class="chart-card">
+        <div class="chart-label">HHS Protect Data · NCBI/PMC 2022</div>
+        <div class="chart-title">US Hospital ICU Capacity Status During Winter Wave (Sept 2020 – Feb 2021)</div>
+        <div class="chart-sub">Share of 1,753 acute care hospitals by ICU capacity status during the third COVID wave — the worst for hospital strain</div>
+        <div class="chart-wrap"><canvas id="c-icu-capacity"></canvas></div>
+        <div class="chart-note">Source: <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC8692088/" target="_blank">Figueroa et al., NCBI/PMC 2022</a></div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-label">ICU Model · CDC MMWR 2021</div>
+        <div class="chart-title">Predicted Additional Excess Deaths by ICU Occupancy Level</div>
+        <div class="chart-sub">CDC-backed statistical model linking hospital ICU strain to additional excess deaths 2 weeks later. Hospital collapse had a measurable mortality multiplier effect.</div>
+        <div class="chart-wrap"><canvas id="c-icu-deaths"></canvas></div>
+        <div class="chart-note">Source: <a href="https://www.cdc.gov/mmwr/volumes/70/wr/mm7046a5.htm" target="_blank">MMWR: Hospital Strain & Excess Deaths, 2021</a></div>
+      </div>
+
+      <div class="chart-card chart-full">
+        <div class="chart-label">Survey of 625 US Hospitals · NCBI 2022</div>
+        <div class="chart-title">Hospital Alert Rates for Overcrowding (March 2020 – April 2021)</div>
+        <div class="chart-sub">Percentage of participating hospitals that reported at least one alert for the listed resource strain during the study period</div>
+        <div class="chart-wrap"><canvas id="c-hospital-alerts"></canvas></div>
+        <div class="chart-note">Source: <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9257510/" target="_blank">ICU Overcrowding & Ventilator Shortages, NCBI 2022</a></div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ═══════════════════════════════════
+       VISUAL TIMELINE
+  ═══════════════════════════════════ -->
+  <section class="section" id="pandemic-timeline">
+    <div class="section-hdr">
+      <span class="section-num">07</span>
+      <h2 class="section-title">Pandemic Timeline</h2>
+      <span class="section-sub">Nov 2019 – present · Filter by category</span>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>Virus / Variants</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div>Policy / Official Guidance</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Vaccines / Boosters</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--purple)"></div>Media / Public Narrative</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--teal)"></div>Narrative Shifts / Reversals</div>
+    </div>
+
+    <div class="tl-controls">
+      <button class="tl-filter f-all active" onclick="filterTL('all',this)">All</button>
+      <button class="tl-filter f-virus" onclick="filterTL('virus',this)">Virus</button>
+      <button class="tl-filter f-policy" onclick="filterTL('policy',this)">Policy</button>
+      <button class="tl-filter f-vaccine" onclick="filterTL('vaccine',this)">Vaccines</button>
+      <button class="tl-filter f-media" onclick="filterTL('media',this)">Media</button>
+      <button class="tl-filter f-shift" onclick="filterTL('shift',this)">Reversals</button>
+    </div>
+
+    <div class="tl-entries" id="tl-container">
+      <!-- Entries injected by JS -->
+    </div>
+  </section>
+
+</div><!-- /page -->
+
+<script>
+// ═══════════════════════════════════════════════════════
+// CHART DEFAULTS
+// ═══════════════════════════════════════════════════════
+Chart.defaults.color = '#8892a4';
+Chart.defaults.borderColor = '#2a3347';
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.font.size = 11;
+Chart.defaults.plugins.legend.labels.usePointStyle = true;
+Chart.defaults.plugins.legend.labels.padding = 14;
+
+const BLUE='#4a9eff', AMBER='#f59e0b', GREEN='#10b981', RED='#f43f5e',
+      PURPLE='#a78bfa', TEAL='#2dd4bf', MUTED='#8892a4';
+
+function mkChart(id, type, labels, datasets, opts={}) {
+  const ctx = document.getElementById(id);
+  if (!ctx) return;
+  return new Chart(ctx, {
+    type, data: { labels, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: opts.legend ?? true }, tooltip: { mode:'index', intersect:false } },
+      scales: opts.scales ?? {
+        x: { grid:{ color:'#1d2433' } },
+        y: { grid:{ color:'#1d2433' }, beginAtZero: true, ...(opts.yAxis||{}) }
+      },
+      ...opts.extra
+    }
+  });
+}
+
+// ─── DEATHS BY YEAR ───
+mkChart('c-us-deaths-year','bar',
+  ['2020','2021','2022'],
+  [{
+    label:'US COVID Deaths (thousands)',
+    data:[385,461,245],
+    backgroundColor:[RED+'cc',RED+'cc',AMBER+'cc'],
+    borderColor:[RED,RED,AMBER], borderWidth:2, borderRadius:4
+  }],
+  { legend:false, scales:{x:{grid:{color:'#1d2433'}},y:{grid:{color:'#1d2433'},beginAtZero:true,ticks:{callback:v=>v+'K'}}} }
+);
+
+// ─── GLOBAL EXCESS ───
+mkChart('c-excess-global','bar',
+  ['Official Reported COVID Deaths 2020-2021','WHO Estimated Excess Deaths 2020-2021'],
+  [{
+    label:'Deaths (millions)',
+    data:[5.42,14.83],
+    backgroundColor:[BLUE+'aa',RED+'aa'],
+    borderColor:[BLUE,RED], borderWidth:2, borderRadius:4
+  }],
+  { legend:false, scales:{x:{grid:{color:'#1d2433'}},y:{grid:{color:'#1d2433'},beginAtZero:true,ticks:{callback:v=>v+'M'}}} }
+);
+
+// ─── CAUSE BREAKDOWN ───
+new Chart(document.getElementById('c-cause-breakdown'), {
+  type:'doughnut',
+  data:{
+    labels:['Underlying cause (COVID drove death chain)','Contributing cause (other condition primary)','Sole cause listed'],
+    datasets:[{data:[72.4,24,3.6],backgroundColor:[RED+'cc',AMBER+'cc',GREEN+'cc'],borderColor:['#0e1117'],borderWidth:2}]
+  },
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{padding:12,font:{size:10}}}}}
+});
+
+// ─── INDIRECT DEATHS ───
+mkChart('c-indirect-deaths','bar',
+  ['Cardiovascular','Substance Use\n& Accidents','Diabetes'],
+  [{
+    label:'Estimated US Excess Deaths (non-COVID, 2020-2024)',
+    data:[115765,86637,41326],
+    backgroundColor:[PURPLE+'aa',RED+'aa',AMBER+'aa'],
+    borderColor:[PURPLE,RED,AMBER], borderWidth:2, borderRadius:4
+  }],
+  { legend:false, scales:{x:{grid:{color:'#1d2433'}},y:{grid:{color:'#1d2433'},beginAtZero:true,ticks:{callback:v=>v.toLocaleString()}}} }
+);
+
+// ─── IFR BY AGE ───
+mkChart('c-ifr-age','bar',
+  ['0–9','10–19','20–29','30–39','40–49','50–59','60–69','70–79','80+'],
+  [{
+    label:'Infection Fatality Rate (%)',
+    data:[0.0005,0.001,0.01,0.04,0.1,0.4,1.0,4.0,12.0],
+    backgroundColor:[d=>d.dataIndex<3?GREEN+'aa':d.dataIndex<6?AMBER+'aa':RED+'aa'],
+    backgroundColor:[GREEN+'aa',GREEN+'aa',GREEN+'aa',AMBER+'aa',AMBER+'aa',AMBER+'aa',RED+'aa',RED+'aa',RED+'cc'],
+    borderColor:[GREEN,GREEN,GREEN,AMBER,AMBER,AMBER,RED,RED,RED],
+    borderWidth:2, borderRadius:4
+  }],
+  {
+    legend:false,
+    scales:{
+      x:{grid:{color:'#1d2433'}},
+      y:{grid:{color:'#1d2433'},beginAtZero:true,type:'logarithmic',ticks:{callback:v=>v+'%'}}
+    }
+  }
+);
+
+// ─── DEATH COMPARE ───
+mkChart('c-death-compare','bar',
+  ['Heart Disease','Cancer','COVID-19\n2021','Accidents','Stroke','Alzheimer\'s','Diabetes','Flu &\nPneumonia'],
+  [{
+    label:'US Annual Deaths (thousands, ~2021)',
+    data:[693,605,461,224,160,130,101,53],
+    backgroundColor:[MUTED+'66',MUTED+'66',RED+'cc',MUTED+'66',MUTED+'66',MUTED+'66',MUTED+'66',MUTED+'44'],
+    borderColor:[MUTED,MUTED,RED,MUTED,MUTED,MUTED,MUTED,MUTED], borderWidth:2, borderRadius:4
+  }],
+  { legend:false, scales:{x:{grid:{color:'#1d2433'}},y:{grid:{color:'#1d2433'},beginAtZero:true,ticks:{callback:v=>v+'K'}}} }
+);
+
+// ─── IFR COMPARE ───
+mkChart('c-ifr-compare','bar',
+  ['Ferguson et al. 2020\n(early estimate)','Verity et al. 2020','Meyerowitz-Katz 2020\n(global avg.)','Wilson 2022\n(CDC serology)','NYC Seroprevalence\n(Amin, 2025)','Ioannidis 2022\n(high-income, 0-59)','Lancet 2022\n(global median)'],
+  [{
+    label:'Overall IFR Estimate (%)',
+    data:[0.9,0.66,0.68,0.85,0.84,0.038,0.31],
+    backgroundColor:[AMBER+'aa',BLUE+'aa',BLUE+'aa',BLUE+'aa',GREEN+'aa',GREEN+'aa',BLUE+'aa'],
+    borderColor:[AMBER,BLUE,BLUE,BLUE,GREEN,GREEN,BLUE], borderWidth:2, borderRadius:4
+  }],
+  { legend:false, scales:{x:{grid:{color:'#1d2433'},ticks:{maxRotation:0}},y:{grid:{color:'#1d2433'},beginAtZero:true,ticks:{callback:v=>v+'%'}}} }
+);
+
+// ─── VACCINE EFFICACY ───
+mkChart('c-vax-efficacy','bar',
+  ['Pfizer\n(BNT162b2)','Moderna\n(mRNA-1273)','Sinopharm\n(BBIBP-CorV)','AstraZeneca\n(ChAdOx1)','J&J\n(Ad26.COV2.S)','Sinovac\n(CoronaVac)'],
+  [{
+    label:'Efficacy vs. Symptomatic Infection (%) — Original Strain',
+    data:[95,94,78,67,67,51],
+    backgroundColor:[GREEN+'cc',GREEN+'cc',AMBER+'cc',AMBER+'cc',AMBER+'cc',RED+'aa'],
+    borderColor:[GREEN,GREEN,AMBER,AMBER,AMBER,RED], borderWidth:2, borderRadius:4
+  }],
+  { legend:false, scales:{x:{grid:{color:'#1d2433'},ticks:{maxRotation:0}},y:{grid:{color:'#1d2433'},beginAtZero:true,max:100,ticks:{callback:v=>v+'%'}}} }
+);
+
+// ─── VARIANT EFFICACY ───
+mkChart('c-variant-efficacy','bar',
+  ['Original Strain\n(Alpha era)','Delta\n(mid-2021)','Omicron BA.1\n(late 2021)','Omicron BA.4/5\n(mid-2022)'],
+  [
+    {
+      label:'vs. Symptomatic Infection',
+      data:[93,88,30,20],
+      backgroundColor:BLUE+'aa', borderColor:BLUE, borderWidth:2, borderRadius:4
+    },
+    {
+      label:'vs. Severe Disease / Hospitalization',
+      data:[97,92,70,60],
+      backgroundColor:GREEN+'aa', borderColor:GREEN, borderWidth:2, borderRadius:4
+    }
+  ],
+  { legend:true, scales:{x:{grid:{color:'#1d2433'},ticks:{maxRotation:0}},y:{grid:{color:'#1d2433'},beginAtZero:true,max:100,ticks:{callback:v=>v+'%'}}} }
+);
+
+// ─── BOOSTER TIMELINE ───
+mkChart('c-booster-timeline','bar',
+  ['Sep 2021\n(Pfizer 65+)','Oct 2021\n(Mod/J&J)', 'Nov 2021\n(18+ all)', 'Dec 2021\n(16-17 yr)','Jan 2022\n(12-15 yr)','Apr 2022\n(2nd booster 60+)','Sep 2022\n(Bivalent all 12+)','Dec 2022\n(6mo-5yr children)','Sep 2023\n(Updated XBB all 6mo+)','Fall 2024\n(JN.1 updated)'],
+  [{
+    label:'New Groups Added',
+    data:[1,2,3,1,2,1,3,2,4,4],
+    backgroundColor:[GREEN+'bb',GREEN+'bb',GREEN+'bb',GREEN+'bb',GREEN+'bb',AMBER+'bb',TEAL+'bb',TEAL+'bb',BLUE+'bb',BLUE+'bb'],
+    borderColor:[GREEN,GREEN,GREEN,GREEN,GREEN,AMBER,TEAL,TEAL,BLUE,BLUE], borderWidth:2, borderRadius:4
+  }],
+  { legend:false, scales:{x:{grid:{color:'#1d2433'},ticks:{maxRotation:45,font:{size:9}}},y:{grid:{color:'#1d2433'},beginAtZero:true,ticks:{stepSize:1,callback:v=>v?'+'+v+' groups':''}}} }
+);
+
+// ─── VAERS ───
+mkChart('c-vaers','bar',
+  ['Death Reports','Myocarditis /\nPericarditis Reports','Heart Attack\nReports','Total Adverse\nEvent Reports (÷100)'],
+  [{
+    label:'VAERS Reports (not confirmed causes)',
+    data:[35487,27229,20184,15696],
+    backgroundColor:[RED+'aa',AMBER+'aa',PURPLE+'aa',MUTED+'66'],
+    borderColor:[RED,AMBER,PURPLE,MUTED], borderWidth:2, borderRadius:4
+  }],
+  { legend:false, scales:{x:{grid:{color:'#1d2433'},ticks:{maxRotation:0}},y:{grid:{color:'#1d2433'},beginAtZero:true,ticks:{callback:v=>v.toLocaleString()}}} }
+);
+
+// ─── MYOCARDITIS ───
+mkChart('c-myocarditis','bar',
+  ['Males 12-15\n(Pfizer dose 2)','Males 16-17\n(Pfizer dose 2)','Males 18-24\n(Pfizer dose 2)','Males 12-17\n(Moderna dose 2)','All ages\n(Israel, all vaccines)'],
+  [{
+    label:'Myocarditis Cases per 100,000 Doses (Vaccine Safety Datalink)',
+    data:[15.3,13.9,10.0,18.0,2.13],
+    backgroundColor:[RED+'aa',RED+'aa',AMBER+'aa',RED+'aa',BLUE+'aa'],
+    borderColor:[RED,RED,AMBER,RED,BLUE], borderWidth:2, borderRadius:4
+  }],
+  { legend:false, scales:{x:{grid:{color:'#1d2433'},ticks:{maxRotation:0,font:{size:9}}},y:{grid:{color:'#1d2433'},beginAtZero:true,ticks:{callback:v=>v+'/100K'}}} }
+);
+
+// ─── MYO COMPARE ───
+mkChart('c-myo-compare','bar',
+  ['COVID-19 Infection\n(all ages, US)','mRNA Vaccine\n(young males, worst case)','mRNA Vaccine\n(all ages avg.)'],
+  [{
+    label:'Myocarditis Cases per 100,000',
+    data:[150,15,2],
+    backgroundColor:[RED+'cc',AMBER+'aa',GREEN+'aa'],
+    borderColor:[RED,AMBER,GREEN], borderWidth:2, borderRadius:4
+  }],
+  { legend:false, scales:{x:{grid:{color:'#1d2433'},ticks:{maxRotation:0}},y:{grid:{color:'#1d2433'},beginAtZero:true,ticks:{callback:v=>v+'/100K'}}} }
+);
+
+// ─── CONFIRMED AEs ───
+mkChart('c-confirmed-aes','bar',
+  ['Myocarditis\n(mRNA, males 16-29)','VITT\n(AstraZeneca)','Anaphylaxis\n(all vaccines)','GBS\n(J&J)'],
+  [{
+    label:'Estimated Rate per Million Doses',
+    data:[130,7,3,7],
+    backgroundColor:[AMBER+'aa',RED+'aa',PURPLE+'aa',TEAL+'aa'],
+    borderColor:[AMBER,RED,PURPLE,TEAL], borderWidth:2, borderRadius:4
+  }],
+  { legend:false, scales:{x:{grid:{color:'#1d2433'},ticks:{maxRotation:0,font:{size:9}}},y:{grid:{color:'#1d2433'},beginAtZero:true,ticks:{callback:v=>v+'/M doses'}}} }
+);
+
+// ─── MASK EVIDENCE ───
+new Chart(document.getElementById('c-mask-evidence'), {
+  type:'radar',
+  data:{
+    labels:['Evidence Volume','Study Quality\n(RCT-based)','Consistency\nAcross Studies','Protection for\nN95 Healthcare','Community\nMask Benefit (RCTs)','Lab Filtration\nEvidence'],
+    datasets:[
+      {
+        label:'Cochrane RCT Analysis',
+        data:[70,95,75,65,15,10],
+        borderColor:BLUE, backgroundColor:BLUE+'22', borderWidth:2, pointBackgroundColor:BLUE
+      },
+      {
+        label:'Observational Studies',
+        data:[95,25,55,70,70,10],
+        borderColor:AMBER, backgroundColor:AMBER+'22', borderWidth:2, pointBackgroundColor:AMBER
+      }
+    ]
+  },
+  options:{
+    responsive:true, maintainAspectRatio:false,
+    scales:{ r:{grid:{color:'#2a3347'},ticks:{backdropColor:'transparent',stepSize:20,callback:v=>v},pointLabels:{font:{size:10}}} },
+    plugins:{legend:{position:'bottom'}}
+  }
+});
+
+// ─── MASK ODDS RATIO ───
+mkChart('c-mask-type','bar',
+  ['Surgical Mask\nvs. No Mask','N95 Respirator\nvs. No Mask','No Mask\n(reference = 1.0)'],
+  [{
+    label:'Odds Ratio (1.0 = no effect, lower = more protective)',
+    data:[0.32,0.03,1.0],
+    backgroundColor:[AMBER+'aa',GREEN+'cc',MUTED+'66'],
+    borderColor:[AMBER,GREEN,MUTED], borderWidth:2, borderRadius:4
+  }],
+  {
+    legend:false,
+    scales:{
+      x:{grid:{color:'#1d2433'},ticks:{maxRotation:0}},
+      y:{grid:{color:'#1d2433'},beginAtZero:true,max:1.2,ticks:{callback:v=>'OR '+v}}
+    }
+  }
+);
+
+// ─── ICU CAPACITY ───
+new Chart(document.getElementById('c-icu-capacity'), {
+  type:'doughnut',
+  data:{
+    labels:['Reached critical capacity (>90%) for 2+ weeks','Did not reach critical capacity'],
+    datasets:[{data:[63,37],backgroundColor:[RED+'cc',GREEN+'66'],borderColor:['#0e1117'],borderWidth:2}]
+  },
+  options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{padding:14,font:{size:11}}}}}
+});
+
+// ─── ICU DEATHS MODEL ───
+mkChart('c-icu-deaths','bar',
+  ['75% ICU Capacity','90% ICU Capacity','100% ICU Capacity (overwhelmed)'],
+  [{
+    label:'Predicted Additional Excess Deaths (within 2 weeks)',
+    data:[12000,45000,80000],
+    backgroundColor:[AMBER+'aa',RED+'88',RED+'cc'],
+    borderColor:[AMBER,RED,RED], borderWidth:2, borderRadius:4
+  }],
+  { legend:false, scales:{x:{grid:{color:'#1d2433'},ticks:{maxRotation:0}},y:{grid:{color:'#1d2433'},beginAtZero:true,ticks:{callback:v=>v.toLocaleString()}}} }
+);
+
+// ─── HOSPITAL ALERTS ───
+mkChart('c-hospital-alerts','bar',
+  ['Any Overcrowding\nAlert (ED or ICU)','ED Overcrowding\nAlert','ICU Overcrowding\nAlert','Ventilator\nShortage Alert'],
+  [{
+    label:'% of 625 Hospitals Reporting Alert',
+    data:[63,63,61,12],
+    backgroundColor:[RED+'aa',AMBER+'aa',RED+'aa',PURPLE+'aa'],
+    borderColor:[RED,AMBER,RED,PURPLE], borderWidth:2, borderRadius:4
+  }],
+  { legend:false, scales:{x:{grid:{color:'#1d2433'},ticks:{maxRotation:0}},y:{grid:{color:'#1d2433'},beginAtZero:true,max:100,ticks:{callback:v=>v+'%'}}} }
+);
+
+
+// ═══════════════════════════════════════════════════════
+// TIMELINE DATA
+// ═══════════════════════════════════════════════════════
+const tlData = [
+  // 2019
+  {y:'2019',date:'Nov 17, 2019',cat:'virus',tag:'Virus',text:'<strong>First known COVID-19 case</strong> — a 55-year-old in Hubei province, China (later identified via retrospective analysis). Official Chinese reports later cluster around December 2019.',src:'https://en.wikipedia.org/wiki/Timeline_of_the_COVID-19_pandemic',srcLabel:'Wikipedia pandemic timeline'},
+  {y:'2019',date:'Dec 31, 2019',cat:'policy',tag:'Policy / WHO',text:'<strong>China alerts WHO</strong> to cases of "pneumonia of unknown etiology" in Wuhan. WHO requests more information.',src:'https://www.cdc.gov/museum/timeline/covid19.html',srcLabel:'CDC Museum Timeline'},
+
+  // 2020
+  {y:'2020',date:'Jan 7, 2020',cat:'virus',tag:'Virus',text:'<strong>Novel coronavirus identified</strong> — Chinese authorities identify a new coronavirus as the cause of the Wuhan pneumonia cluster. Named 2019-nCoV, later SARS-CoV-2.',src:'https://www.cdc.gov/museum/timeline/covid19.html',srcLabel:'CDC Museum Timeline'},
+  {y:'2020',date:'Jan 20, 2020',cat:'policy',tag:'Policy / CDC',text:'<strong>First US case confirmed</strong> in a Washington State resident who had returned from Wuhan. CDC activates Emergency Operations Center.',src:'https://www.cdc.gov/museum/timeline/covid19.html',srcLabel:'CDC Museum Timeline'},
+  {y:'2020',date:'Jan 22, 2020',cat:'media',tag:'Media / Official',text:'<strong>Fauci: "It\'s not a major threat to the people of the United States."</strong> NIAID Director Anthony Fauci downplays risk in an interview, citing the containment of prior coronavirus outbreaks.',src:'https://abcnews.com/Health/covid-19-timeline-deadly-virus-worlds-response-evolved/story?id=107880313',srcLabel:'ABC News COVID-19 Timeline'},
+  {y:'2020',date:'Jan 30, 2020',cat:'policy',tag:'WHO',text:'<strong>WHO declares Public Health Emergency of International Concern (PHEIC)</strong> — the highest WHO alert level. 7,818 confirmed cases globally.',src:'https://www.cdc.gov/museum/timeline/covid19.html',srcLabel:'CDC Museum Timeline'},
+  {y:'2020',date:'Feb 25, 2020',cat:'media',tag:'Media / CDC',text:'<strong>CDC warns Americans to prepare for "significant disruption."</strong> Senior CDC official Dr. Nancy Messonnier says community spread in the US is likely. Markets drop sharply.',src:'https://abcnews.com/Health/covid-19-timeline-deadly-virus-worlds-response-evolved/story?id=107880313',srcLabel:'ABC News Timeline'},
+  {y:'2020',date:'Mar 3, 2020',cat:'policy',tag:'Policy / Fauci',text:'<strong>Fauci: "We do not recommend that you go and buy a mask."</strong> Public guidance discourages public mask use, citing supply concerns for healthcare workers.',src:'https://abcnews.com/Health/covid-19-timeline-deadly-virus-worlds-response-evolved/story?id=107880313',srcLabel:'ABC News Timeline'},
+  {y:'2020',date:'Mar 11, 2020',cat:'virus',tag:'WHO / Pandemic',text:'<strong>WHO declares COVID-19 a pandemic.</strong> Global cases: ~125,000. US: ~1,000. WHO Director Tedros: "This is not just a public health crisis, it is a crisis that will touch every sector."',src:'https://www.cdc.gov/museum/timeline/covid19.html',srcLabel:'CDC Museum Timeline'},
+  {y:'2020',date:'Mar 13, 2020',cat:'policy',tag:'Policy / US',text:'<strong>President Trump declares national emergency.</strong> 50 states subsequently issue disaster declarations. School closures begin across the US.',src:'https://www.cdc.gov/museum/timeline/covid19.html',srcLabel:'CDC Museum Timeline'},
+  {y:'2020',date:'Mar 16, 2020',cat:'policy',tag:'Policy / CDC',text:'<strong>White House issues "15 Days to Slow the Spread" guidelines</strong> — 6-foot distancing, avoiding gatherings of 10+, and telework recommendations.',src:'https://www.cdc.gov/museum/timeline/covid19.html',srcLabel:'CDC Museum Timeline'},
+  {y:'2020',date:'Mar 27, 2020',cat:'media',tag:'Media',text:'<strong>NYC overwhelmed</strong> — refrigerator trucks used as temporary morgues outside hospitals. US death toll: ~2,000. NY Gov. Cuomo asks federal government for 30,000 ventilators.',src:'https://en.wikipedia.org/wiki/2021_hospital_crisis_in_the_U.S._from_COVID-19',srcLabel:'Wikipedia US Hospital Crisis'},
+  {y:'2020',date:'Apr 3, 2020',cat:'shift',tag:'Reversal',text:'<strong>CDC reverses mask guidance</strong> — now recommends cloth face coverings for all Americans in public, reversing Feb–March advice against public mask use.',src:'https://www.cdc.gov/museum/timeline/covid19.html',srcLabel:'CDC Museum Timeline'},
+  {y:'2020',date:'Apr 29, 2020',cat:'media',tag:'Media / Fauci',text:'<strong>Fauci tells CNN masks are "not 100% effective"</strong> but increasingly recommends them — consistent pivot from earlier stance. Administration guidance still inconsistent.',src:'https://abcnews.com/Health/covid-19-timeline-deadly-virus-worlds-response-evolved/story?id=107880313',srcLabel:'ABC News Timeline'},
+  {y:'2020',date:'May 25, 2020',cat:'media',tag:'Media / Lab Leak',text:'<strong>Lab leak hypothesis widely dismissed as fringe</strong> — mainstream outlets including PolitiFact, USA Today, and major networks label lab-leak as "debunked" or a "conspiracy theory." WHO and most scientists publicly back zoonotic origin.',src:'https://en.wikipedia.org/wiki/COVID-19_lab_leak_theory',srcLabel:'Wikipedia Lab Leak Theory'},
+  {y:'2020',date:'Jun 5, 2020',cat:'shift',tag:'WHO Reversal',text:'<strong>WHO reverses stance on asymptomatic spread</strong> — a WHO official states asymptomatic transmission is "very rare," then backtracks 24 hours later after widespread criticism from scientists.',src:'https://abcnews.com/Health/covid-19-timeline-deadly-virus-worlds-response-evolved/story?id=107880313',srcLabel:'ABC News Timeline'},
+  {y:'2020',date:'Aug 26, 2020',cat:'shift',tag:'CDC Reversal',text:'<strong>CDC quietly revises testing guidance</strong> — updates website to say asymptomatic close contacts "do not necessarily need a test." This later reversed again after widespread criticism from scientists.',src:'https://www.cdc.gov/museum/timeline/covid19.html',srcLabel:'CDC Museum Timeline'},
+  {y:'2020',date:'Nov 9, 2020',cat:'vaccine',tag:'Vaccine Milestone',text:'<strong>Pfizer/BioNTech announce 90%+ vaccine efficacy</strong> in Phase 3 trial — first major vaccine efficacy readout. Markets rally. Trial of ~44,000 participants.',src:'https://www.mayoclinic.org/diseases-conditions/history-disease-outbreaks-vaccine-timeline/covid-19',srcLabel:'Mayo Clinic Vaccine Timeline'},
+  {y:'2020',date:'Nov 16, 2020',cat:'vaccine',tag:'Vaccine Milestone',text:'<strong>Moderna announces 94.5% efficacy</strong> in its Phase 3 trial — second mRNA vaccine with high efficacy. Both vaccines use novel mRNA technology, never before approved for humans.',src:'https://www.mayoclinic.org/diseases-conditions/history-disease-outbreaks-vaccine-timeline/covid-19',srcLabel:'Mayo Clinic Vaccine Timeline'},
+  {y:'2020',date:'Dec 11, 2020',cat:'vaccine',tag:'EUA',text:'<strong>FDA grants Emergency Use Authorization (EUA) for Pfizer-BioNTech vaccine</strong> — first COVID-19 vaccine authorized in the US. Recommended for ages 16+.',src:'https://www.immunize.org/vaccines/vaccine-timeline/',srcLabel:'Immunize.org Vaccine Timeline'},
+  {y:'2020',date:'Dec 14, 2020',cat:'vaccine',tag:'First Doses',text:'<strong>First US COVID-19 vaccinations administered</strong> — ICU nurse Sandra Lindsay receives the first publicly administered dose in New York. Priority given to healthcare workers and nursing home residents.',src:'https://www.cdc.gov/museum/timeline/covid19.html',srcLabel:'CDC Museum Timeline'},
+  {y:'2020',date:'Dec 18, 2020',cat:'vaccine',tag:'EUA',text:'<strong>FDA grants EUA for Moderna vaccine</strong> — recommended for ages 18+. US now has two authorized mRNA vaccines; mass vaccination rollout begins.',src:'https://www.immunize.org/vaccines/vaccine-timeline/',srcLabel:'Immunize.org Vaccine Timeline'},
+
+  // 2021
+  {y:'2021',date:'Jan 6, 2021',cat:'virus',tag:'Death Toll',text:'<strong>US records 300,000 COVID deaths</strong> — death toll milestone reached. Daily deaths exceed 4,000 on January 7. ICU capacity at crisis levels in multiple states.',src:'https://www.historycentral.com/Today/Covis.html',srcLabel:'History Central COVID Timeline'},
+  {y:'2021',date:'Feb 27, 2021',cat:'vaccine',tag:'EUA',text:'<strong>FDA grants EUA for Johnson & Johnson single-dose vaccine</strong> — first non-mRNA, single-dose COVID vaccine authorized in the US. Simplifies logistics; concerns later emerge about rare VITT blood clots.',src:'https://www.immunize.org/vaccines/vaccine-timeline/',srcLabel:'Immunize.org Vaccine Timeline'},
+  {y:'2021',date:'Mar 29, 2021',cat:'media',tag:'Media / Fauci',text:'<strong>Fauci on CNN: vaccinated people can remove masks outdoors</strong> — appearing on multiple Sunday shows, Fauci signals loosening of guidance for vaccinated Americans.',src:'https://abcnews.com/Health/covid-19-timeline-deadly-virus-worlds-response-evolved/story?id=107880313',srcLabel:'ABC News Timeline'},
+  {y:'2021',date:'Apr 13, 2021',cat:'shift',tag:'Safety Pause',text:'<strong>US pauses J&J vaccine over VITT blood clot reports</strong> — 6 cases of cerebral venous sinus thrombosis among ~7 million doses prompt 11-day pause. Vaccine later resumed with added warning. EMA confirms causal link.',src:'https://pmc.ncbi.nlm.nih.gov/articles/PMC8050478/',srcLabel:'NCBI: AstraZeneca VITT, 2021'},
+  {y:'2021',date:'May 11, 2021',cat:'shift',tag:'Reversal / Testimony',text:'<strong>Fauci testifies: "NIH has not ever and does not now fund gain-of-function research in the Wuhan Institute of Virology."</strong> Sen. Rand Paul disputes this claim. Later contradicted by NIH letter (Oct 2021).',src:'https://www.washingtonexaminer.com/policy/healthcare/4617091/timeline-fauci-involvement-covid-origins-debate/',srcLabel:'Washington Examiner Fauci Timeline'},
+  {y:'2021',date:'May 13, 2021',cat:'shift',tag:'CDC Reversal',text:'<strong>CDC: fully vaccinated people can drop masks indoors</strong> — CDC updates guidance ending indoor mask requirements for vaccinated Americans. Major policy reversal; many states immediately end mask mandates.',src:'https://abcnews.com/Health/covid-19-timeline-deadly-virus-worlds-response-evolved/story?id=107880313',srcLabel:'ABC News Timeline'},
+  {y:'2021',date:'May 26, 2021',cat:'shift',tag:'Origins Shift',text:'<strong>President Biden orders 90-day intelligence review on COVID origins</strong> — officially acknowledging the lab leak hypothesis as warranting serious investigation, reversing the dismissive stance of early 2020.',src:'https://www.washingtonexaminer.com/policy/healthcare/4617091/timeline-fauci-involvement-covid-origins-debate/',srcLabel:'Washington Examiner Timeline'},
+  {y:'2021',date:'Jun 10, 2021',cat:'media',tag:'Media / Lab Leak',text:'<strong>Major media pivot on lab leak theory</strong> — after a year of dismissal, NYT, WSJ, and Washington Post publish pieces reconsidering the lab-leak hypothesis as plausible. Facebook lifts its ban on lab-leak content.',src:'https://en.wikipedia.org/wiki/COVID-19_lab_leak_theory',srcLabel:'Wikipedia Lab Leak Theory'},
+  {y:'2021',date:'Jul 27, 2021',cat:'shift',tag:'CDC Reversal',text:'<strong>CDC recommends masks indoors again — including for vaccinated people</strong> — reversal driven by Delta variant data showing vaccinated people can carry high viral loads. Data from Barnstable County, MA cited.',src:'https://www.cdc.gov/museum/timeline/covid19.html',srcLabel:'CDC Museum Timeline'},
+  {y:'2021',date:'Aug 23, 2021',cat:'vaccine',tag:'Full Approval',text:'<strong>FDA grants full approval (BLA) for Pfizer-BioNTech vaccine (Comirnaty)</strong> — first COVID-19 vaccine to receive full FDA approval, not just EUA. Triggers military vaccine mandate; spurs employer mandates.',src:'https://www.immunize.org/vaccines/vaccine-timeline/',srcLabel:'Immunize.org Vaccine Timeline'},
+  {y:'2021',date:'Sep 9, 2021',cat:'policy',tag:'Policy / Mandates',text:'<strong>Biden announces vaccine mandate for federal workers and large employers</strong> — OSHA to issue emergency rule requiring vaccination or weekly testing for companies with 100+ employees. Later blocked by Supreme Court (Jan 2022).',src:'https://abcnews.com/Health/covid-19-timeline-deadly-virus-worlds-response-evolved/story?id=107880313',srcLabel:'ABC News Timeline'},
+  {y:'2021',date:'Sep 22, 2021',cat:'vaccine',tag:'Booster / EUA',text:'<strong>FDA authorizes Pfizer booster for ages 65+, high-risk groups</strong> — first COVID-19 booster authorization in the US. CDC later recommends for 18+ in November 2021.',src:'https://www.immunize.org/vaccines/vaccine-timeline/',srcLabel:'Immunize.org Vaccine Timeline'},
+  {y:'2021',date:'Oct 2021',cat:'shift',tag:'NIH Reversal',text:'<strong>NIH letter to Congress acknowledges WIV research produced enhanced bat coronaviruses</strong> — contradicts Fauci\'s May 2021 testimony. NIH says the work did not meet their GoF definition but critics dispute this interpretation.',src:'https://theintercept.com/2021/09/09/covid-origins-gain-of-function-research/',srcLabel:'The Intercept, 2021'},
+  {y:'2021',date:'Oct 6, 2021',cat:'policy',tag:'WHO / Long COVID',text:'<strong>WHO publishes clinical case definition of Long COVID</strong> — formally recognizes post-COVID condition with symptoms persisting 3+ months post-infection. Estimated to affect millions globally.',src:'https://abcnews.com/Health/covid-19-timeline-deadly-virus-worlds-response-evolved/story?id=107880313',srcLabel:'ABC News Timeline'},
+  {y:'2021',date:'Oct 29, 2021',cat:'vaccine',tag:'EUA',text:'<strong>FDA authorizes Pfizer vaccine for children ages 5–11</strong> — pediatric dose (10 mcg vs. 30 mcg adult). Parents divided; vaccination rates in 5-11 age group lag behind older groups.',src:'https://www.immunize.org/vaccines/vaccine-timeline/',srcLabel:'Immunize.org Vaccine Timeline'},
+  {y:'2021',date:'Nov 19, 2021',cat:'vaccine',tag:'Booster',text:'<strong>CDC recommends boosters for everyone 18+ </strong> — expands recommendation from high-risk groups to all adults. Timed at 6 months after primary series (later shortened).',src:'https://abcnews.com/Health/covid-19-timeline-deadly-virus-worlds-response-evolved/story?id=107880313',srcLabel:'ABC News Timeline'},
+  {y:'2021',date:'Nov 26, 2021',cat:'virus',tag:'Omicron',text:'<strong>WHO designates Omicron (B.1.1.529) a Variant of Concern</strong> — first detected in South Africa. WHO names it Omicron, skipping two Greek letters (Nu, Xi). Far more transmissible than Delta; immune evasion concerns.',src:'https://en.wikipedia.org/wiki/Timeline_of_the_COVID-19_pandemic',srcLabel:'Wikipedia Pandemic Timeline'},
+  {y:'2021',date:'Dec 22, 2021',cat:'policy',tag:'Treatment EUA',text:'<strong>FDA authorizes Paxlovid (Pfizer) and molnupiravir (Merck)</strong> — first oral antiviral COVID treatments. Paxlovid shows ~89% reduction in hospitalization risk in high-risk adults.',src:'https://abcnews.com/Health/covid-19-timeline-deadly-virus-worlds-response-evolved/story?id=107880313',srcLabel:'ABC News Timeline'},
+
+  // 2022
+  {y:'2022',date:'Jan 4, 2022',cat:'virus',tag:'Omicron Peak',text:'<strong>US reports 1 million+ daily COVID cases</strong> — Omicron drives the highest single-day case count ever. Hospital admissions peak at 150,650 per week (Jan 15). Deaths lag cases due to Omicron\'s lower severity.',src:'https://abcnews.com/Health/covid-19-timeline-deadly-virus-worlds-response-evolved/story?id=107880313',srcLabel:'ABC News Timeline'},
+  {y:'2022',date:'Jan 13, 2022',cat:'policy',tag:'Supreme Court',text:'<strong>Supreme Court blocks Biden\'s OSHA vaccine mandate for large employers</strong> — 6-3 ruling. Upholds separate mandate for healthcare facilities receiving federal funding.',src:'https://abcnews.com/Health/covid-19-timeline-deadly-virus-worlds-response-evolved/story?id=107880313',srcLabel:'ABC News Timeline'},
+  {y:'2022',date:'Jan 2022',cat:'shift',tag:'Reversal',text:'<strong>Fauci privately acknowledges (Jan 2024 testimony) 6-foot rule was not science-based</strong> — in congressional testimony, Fauci says the 6-foot social distancing guideline "just appeared" and was not based on studies.',src:'https://www.washingtonexaminer.com/policy/healthcare/4617091/timeline-fauci-involvement-covid-origins-debate/',srcLabel:'Washington Examiner Timeline'},
+  {y:'2022',date:'Feb 25, 2022',cat:'shift',tag:'CDC Reversal',text:'<strong>CDC updates indoor mask guidance using new "community levels" framework</strong> — replaces transmission-based system. Most of the US drops to "low" or "medium" level, no longer recommending masks for most Americans.',src:'https://abcnews.com/Health/covid-19-timeline-deadly-virus-worlds-response-evolved/story?id=107880313',srcLabel:'ABC News Timeline'},
+  {y:'2022',date:'May 12, 2022',cat:'virus',tag:'Death Milestone',text:'<strong>US reaches 1 million COVID deaths</strong> — milestone reached approximately 27 months after the first US death. Biden orders flags at half-staff.',src:'https://www.historycentral.com/Today/Covis.html',srcLabel:'History Central COVID Timeline'},
+  {y:'2022',date:'Sep 1, 2022',cat:'vaccine',tag:'Bivalent Vaccine',text:'<strong>FDA authorizes bivalent (Omicron-targeting) boosters for ages 12+</strong> — updated Pfizer and Moderna formulas target both original strain and Omicron BA.4/BA.5. CDC recommends as single booster dose.',src:'https://www.immunize.org/vaccines/vaccine-timeline/',srcLabel:'Immunize.org Vaccine Timeline'},
+  {y:'2022',date:'Sep 18, 2022',cat:'media',tag:'Media / Biden',text:'<strong>President Biden: "The pandemic is over."</strong> In a 60 Minutes interview, Biden declares the pandemic over. Fauci and WHO Director Tedros both note the virus is still causing significant deaths.',src:'https://www.thinkglobalhealth.org/article/updated-timeline-coronavirus',srcLabel:'Think Global Health Timeline'},
+
+  // 2023
+  {y:'2023',date:'Feb 2023',cat:'shift',tag:'Origins Shift',text:'<strong>Dept. of Energy and FBI both conclude lab leak "most likely" origin</strong> — joining a growing list of intelligence agencies that shifted from "undecided" to favoring a lab-related incident (both at low-moderate confidence).',src:'https://en.wikipedia.org/wiki/COVID-19_lab_leak_theory',srcLabel:'Wikipedia Lab Leak Theory'},
+  {y:'2023',date:'Feb 2023',cat:'shift',tag:'Cochrane / Masks',text:'<strong>Cochrane Review: masks "may make little to no difference" in community spread</strong> — 78-RCT systematic review finds no evidence of community benefit from mask interventions. Widely covered; generates significant debate.',src:'https://www.cochranelibrary.com/cdsr/doi/10.1002/14651858.CD006207.pub6/full',srcLabel:'Jefferson et al., Cochrane 2023'},
+  {y:'2023',date:'May 5, 2023',cat:'policy',tag:'WHO / PHEIC End',text:'<strong>WHO ends COVID-19 Public Health Emergency of International Concern</strong> — 3+ years after declaration. Still considers COVID a pandemic and "established and ongoing health issue."',src:'https://abcnews.com/Health/covid-19-timeline-deadly-virus-worlds-response-evolved/story?id=107880313',srcLabel:'ABC News Timeline'},
+  {y:'2023',date:'May 11, 2023',cat:'policy',tag:'US Emergency End',text:'<strong>US COVID-19 public health emergency designation expires</strong> — after 3 years and multiple renewals. Free testing, treatment, and vaccine programs begin to wind down.',src:'https://abcnews.com/Health/covid-19-timeline-deadly-virus-worlds-response-evolved/story?id=107880313',srcLabel:'ABC News Timeline'},
+  {y:'2023',date:'May 2023',cat:'shift',tag:'House Committee',text:'<strong>House Select Subcommittee begins releasing evidence on lab leak and Fauci connections</strong> — Republican-led committee releases documents and testimony suggesting coordination around "Proximal Origin" paper.',src:'https://www.science.org/content/article/house-panel-concludes-covid-19-pandemic-came-lab-leak',srcLabel:'Science Magazine, 2024'},
+  {y:'2023',date:'Sep 11, 2023',cat:'vaccine',tag:'Updated Vaccine',text:'<strong>FDA approves updated XBB.1.5 (Omicron) COVID vaccine for all ages 6 months+</strong> — monovalent formulation targeting the most prevalent Omicron subvariant. First annual updated COVID shot similar to flu vaccine model.',src:'https://abcnews.com/Health/covid-19-timeline-deadly-virus-worlds-response-evolved/story?id=107880313',srcLabel:'ABC News Timeline'},
+
+  // 2024
+  {y:'2024',date:'Jan 2024',cat:'shift',tag:'Fauci Testimony',text:'<strong>Fauci testifies privately for 14 hours before House subcommittee</strong> — acknowledges 6-foot rule "not based on scientific studies." Maintains GoF positions. Transcript later released publicly.',src:'https://www.washingtonexaminer.com/policy/healthcare/4617091/timeline-fauci-involvement-covid-origins-debate/',srcLabel:'Washington Examiner Fauci Timeline'},
+  {y:'2024',date:'Jan 2025',cat:'shift',tag:'Intelligence / CIA',text:'<strong>CIA joins FBI and Dept. of Energy favoring lab leak origin</strong> — with "low confidence." 4 agencies + National Intelligence Council still lean toward natural origin. No agency has high confidence in either direction.',src:'https://theconversation.com/the-lab-leak-origin-of-covid-19-fact-or-fiction-250462',srcLabel:'The Conversation: Lab Leak, Dec 2025'},
+  {y:'2024',date:'May 2024',cat:'vaccine',tag:'AZ Withdrawal',text:'<strong>AstraZeneca voluntarily withdraws its COVID-19 vaccine globally</strong> — company cites commercial reasons (surplus of updated mRNA vaccines). Not triggered by new safety findings, but sparks renewed VITT debate.',src:'https://pmc.ncbi.nlm.nih.gov/articles/PMC10655150/',srcLabel:'NCBI VITT review'},
+  {y:'2024',date:'May 2024',cat:'shift',tag:'House Committee',text:'<strong>House Select Subcommittee releases final report: lab leak most likely, natural origin "not natural"</strong> — two-year investigation of 1M+ documents. Democratic members dispute conclusions. Science community divided.',src:'https://www.science.org/content/article/house-panel-concludes-covid-19-pandemic-came-lab-leak',srcLabel:'Science Magazine, May 2024'},
+  {y:'2024',date:'Jun 2024',cat:'shift',tag:'CDC Reversal',text:'<strong>CDC updates COVID isolation guidance</strong> — people who test positive no longer need to isolate for 5 days; instead follows symptoms-based guidance aligned with other respiratory illness protocols.',src:'https://abcnews.com/Health/covid-19-timeline-deadly-virus-worlds-response-evolved/story?id=107880313',srcLabel:'ABC News Timeline'},
+  {y:'2024',date:'Aug 2024',cat:'vaccine',tag:'Updated Vaccine',text:'<strong>FDA approves 2024–2025 JN.1-targeting COVID vaccine</strong> — annual updated COVID shot. CDC recommends for everyone 6 months+. Pattern mirrors annual flu vaccine model.',src:'https://en.wikipedia.org/wiki/COVID-19_vaccine',srcLabel:'Wikipedia: COVID-19 Vaccine'},
+
+  // 2025
+  {y:'2025',date:'Jan 2025',cat:'shift',tag:'Intelligence',text:'<strong>CIA formally shifts to favoring lab-leak (low confidence)</strong> — new CIA director John Ratcliffe calls origins investigation a top priority. CIA joins FBI and DOE.',src:'https://theconversation.com/the-lab-leak-origin-of-covid-19-fact-or-fiction-250462',srcLabel:'The Conversation, Dec 2025'},
+  {y:'2025',date:'Jun 2025',cat:'shift',tag:'White House Report',text:'<strong>White House publishes formal report: lab leak "most likely origin"</strong> — current administration declares a lab-related incident involving gain-of-function research most likely. States "Proximal Origin" paper was "prompted by Fauci." Calls for reform of GoF oversight.',src:'https://www.whitehouse.gov/lab-leak-true-origins-of-covid-19/',srcLabel:'White House Report, June 2025'},
+  {y:'2025',date:'Fall 2025',cat:'vaccine',tag:'Current Booster',text:'<strong>2025–2026 updated COVID vaccine recommended</strong> — WHO recommends monovalent JN.1 or KP.2 vaccines as appropriate. LP.8.1 antigen also under consideration. Annual booster model now established.',src:'https://en.wikipedia.org/wiki/COVID-19_vaccine',srcLabel:'Wikipedia: COVID-19 Vaccine (updated 2025)'},
+];
+
+function buildTimeline(filter='all') {
+  const container = document.getElementById('tl-container');
+  let html = '';
+  let currentYear = '';
+
+  tlData.forEach((e,i) => {
+    const show = filter === 'all' || filter === e.cat;
+    if (!show) { return; }
+
+    if (e.y !== currentYear) {
+      currentYear = e.y;
+      html += `<div class="tl-year-label">${e.y}</div>`;
+    }
+
+    const isLast = (i === tlData.length - 1);
+    html += `
+      <div class="tl-entry cat-${e.cat}">
+        <div class="tl-date-col"><div class="tl-date-str">${e.date}</div></div>
+        <div class="tl-line-col"><div class="tl-dot"></div>${isLast?'':'<div class="tl-vline"></div>'}</div>
+        <div class="tl-body">
+          <div class="tl-tag">${e.tag}</div>
+          <div class="tl-text">${e.text}</div>
+          ${e.src ? `<a class="tl-src" href="${e.src}" target="_blank">→ ${e.srcLabel}</a>` : ''}
+        </div>
+      </div>`;
+  });
+
+  container.innerHTML = html;
+}
+
+function filterTL(cat, btn) {
+  document.querySelectorAll('.tl-filter').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  buildTimeline(cat);
+}
+
+// Build on load
+buildTimeline('all');
+
+// ── NAV ACTIVE STATE ──
+const navLinks = document.querySelectorAll('.nav-link');
+window.addEventListener('scroll', () => {
+  const sections = document.querySelectorAll('.section');
+  let current = '';
+  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 80) current = s.id; });
+  navLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href')==='#'+current));
+}, { passive:true });
+</script>
+</body>
+</html>
